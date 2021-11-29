@@ -15,7 +15,6 @@ func Unpack(packedString string) (string, error) {
 	lastRune := emptyRune
 	isEscaped := false
 	for _, currentRune := range packedString {
-
 		if isEscaped {
 			if unicode.IsLetter(currentRune) {
 				// впрочем, что плохого в экранировании буквы? ;)
