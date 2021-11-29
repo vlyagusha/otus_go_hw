@@ -21,7 +21,7 @@ func Unpack(packedString string) (string, error) {
 			continue
 		}
 
-		if unicode.IsLetter(currentRune) && unicode.IsLetter(lastRune) {
+		if unicode.IsLetter(currentRune) {
 			unpackedString.WriteRune(lastRune)
 			lastRune = currentRune
 			continue
@@ -31,7 +31,7 @@ func Unpack(packedString string) (string, error) {
 			return "", ErrInvalidString
 		}
 
-		if unicode.IsDigit(currentRune) && unicode.IsLetter(lastRune) {
+		if unicode.IsDigit(currentRune) {
 			count, _ := strconv.Atoi(string(currentRune))
 			for i := 0; i < count; i++ {
 				unpackedString.WriteRune(lastRune)
