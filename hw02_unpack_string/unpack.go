@@ -9,13 +9,31 @@ import (
 
 var ErrInvalidString = errors.New("invalid string")
 
-const emptyRune = rune(0)
-
 func Unpack(packedString string) (string, error) {
+	const emptyRune = rune(0)
 	unpackedString := strings.Builder{}
 	lastRune := emptyRune
-
+	isEscaped := false
 	for _, currentRune := range packedString {
+
+		if isEscaped {
+			if unicode.IsLetter(currentRune) {
+				// впрочем, что плохого в экранировании буквы? ;)
+				return "", ErrInvalidString
+			}
+			if lastRune != emptyRune {
+				unpackedString.WriteRune(lastRune)
+			}
+			lastRune = currentRune
+			isEscaped = false
+			continue
+		}
+
+		if currentRune == '\\' {
+			isEscaped = true
+			continue
+		}
+
 		if unicode.IsLetter(currentRune) && lastRune == emptyRune {
 			lastRune = currentRune
 			continue
@@ -43,14 +61,15 @@ func Unpack(packedString string) (string, error) {
 		return "", ErrInvalidString
 	}
 
-	if unicode.IsLetter(lastRune) {
-		unpackedString.WriteRune(lastRune)
-		return unpackedString.String(), nil
+	if isEscaped {
+		return "", ErrInvalidString
 	}
 
 	if lastRune == emptyRune {
 		return unpackedString.String(), nil
 	}
 
-	return "", ErrInvalidString
+	unpackedString.WriteRune(lastRune)
+
+	return unpackedString.String(), nil
 }
