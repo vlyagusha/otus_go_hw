@@ -17,7 +17,6 @@ func Unpack(packedString string) (string, error) {
 	for _, currentRune := range packedString {
 		if isEscaped {
 			if unicode.IsLetter(currentRune) {
-				// впрочем, что плохого в экранировании буквы? ;)
 				return "", ErrInvalidString
 			}
 			if lastRune != emptyRune {
@@ -33,12 +32,12 @@ func Unpack(packedString string) (string, error) {
 			continue
 		}
 
-		if unicode.IsLetter(currentRune) && lastRune == emptyRune {
+		if (unicode.IsLetter(currentRune) || unicode.IsSpace(currentRune)) && lastRune == emptyRune {
 			lastRune = currentRune
 			continue
 		}
 
-		if unicode.IsLetter(currentRune) {
+		if unicode.IsLetter(currentRune) || unicode.IsSpace(currentRune) {
 			unpackedString.WriteRune(lastRune)
 			lastRune = currentRune
 			continue
