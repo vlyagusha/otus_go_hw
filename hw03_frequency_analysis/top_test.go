@@ -48,6 +48,10 @@ func TestTop10(t *testing.T) {
 		require.Len(t, Top10(""), 0)
 	})
 
+	t.Run("only spaces", func(t *testing.T) {
+		require.Len(t, Top10("                         "), 0)
+	})
+
 	t.Run("positive test", func(t *testing.T) {
 		if taskWithAsteriskIsCompleted {
 			expected := []string{
@@ -78,5 +82,51 @@ func TestTop10(t *testing.T) {
 			}
 			require.Equal(t, expected, Top10(text))
 		}
+	})
+
+	t.Run("all words are equal", func(t *testing.T) {
+		expected := []string{
+			"test",
+		}
+		require.Equal(t, expected, Top10(`
+			test test test test test test test test test test test test 
+			test test test test test test test test test test test test 
+			test test test test test test test test test test test test 
+			test test test test test test test test test test test test 
+			test test test test test test test test test test test test 
+			test test test test test test test test test test test test 
+		`))
+	})
+
+	t.Run("top-15 words with equal count", func(t *testing.T) {
+		expected := []string{
+			"a",
+			"b",
+			"c",
+			"d",
+			"e",
+			"f",
+			"g",
+			"h",
+			"i",
+			"j",
+		}
+		require.Equal(t, expected, Top10(`
+			a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a a 
+			b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b b 
+			c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c c 
+			d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d d 
+			e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e e 
+			f f f f f f f f f f f f f f f f f f f f f f f f f f f f f f f f f 
+			g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g g 
+			h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h h 
+			i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i i 
+			j j j j j j j j j j j j j j j j j j j j j j j j j j j j j j j j j 
+			k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k k 
+			l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l l 
+			m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m m 
+			o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o o 
+			p p p p p p p p p p p p p p p p p p p p p p p p p p p p p p p p p 
+		`))
 	})
 }
