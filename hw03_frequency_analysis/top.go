@@ -1,6 +1,7 @@
 package hw03frequencyanalysis
 
 import (
+	"regexp"
 	"sort"
 	"strings"
 )
@@ -10,6 +11,8 @@ func Top10(text string) []string {
 
 	return getTopSortedWords(wordsMap, 10)
 }
+
+var wordRegExpr = regexp.MustCompile("[\\wа-яёА-ЯЁ]+[-\\wа-яёА-ЯЁ]*")
 
 func getTopSortedWords(words map[string]int, top int) []string {
 	type WordCounter struct {
@@ -44,14 +47,15 @@ func getTopSortedWords(words map[string]int, top int) []string {
 }
 
 func getWordsCountMap(text string) map[string]int {
-	words := make(map[string]int, 0)
-	for _, s := range strings.Fields(text) {
-		if _, ok := words[s]; ok {
-			words[s] += 1
+	wordsCountMap := make(map[string]int, 0)
+	words := wordRegExpr.FindAllString(strings.ToLower(text), -1)
+	for _, s := range words {
+		if _, ok := wordsCountMap[s]; ok {
+			wordsCountMap[s] += 1
 		} else {
-			words[s] = 1
+			wordsCountMap[s] = 1
 		}
 	}
 
-	return words
+	return wordsCountMap
 }
