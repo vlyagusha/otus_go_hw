@@ -3,7 +3,6 @@ package hw03frequencyanalysis
 import (
 	"sort"
 	"strings"
-	"unicode"
 )
 
 func Top10(text string) []string {
@@ -46,13 +45,7 @@ func getTopSortedWords(words map[string]int, top int) []string {
 
 func getWordsCountMap(text string) map[string]int {
 	words := make(map[string]int, 0)
-	runes := []rune(text)
-	i, s := 0, ""
-	for {
-		i, s = getWordFromPosition(i, runes)
-		if i >= len(runes) {
-			break
-		}
+	for _, s := range strings.Fields(text) {
 		if _, ok := words[s]; ok {
 			words[s] += 1
 		} else {
@@ -61,19 +54,4 @@ func getWordsCountMap(text string) map[string]int {
 	}
 
 	return words
-}
-
-func getWordFromPosition(pos int, runes []rune) (int, string) {
-	if pos >= len(runes) {
-		return pos, ""
-	}
-
-	res := strings.Builder{}
-	for ; pos < len(runes) && unicode.IsSpace(runes[pos]); pos++ {
-	}
-	for ; pos < len(runes) && !unicode.IsSpace(runes[pos]); pos++ {
-		res.WriteRune(runes[pos])
-	}
-
-	return pos, res.String()
 }
