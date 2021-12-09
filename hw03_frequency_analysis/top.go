@@ -12,7 +12,7 @@ func Top10(text string) []string {
 	return getTopSortedWords(wordsMap, 10)
 }
 
-var wordRegExpr = regexp.MustCompile("[\\wа-яёА-ЯЁ]+[-\\wа-яёА-ЯЁ]*")
+var wordRegExpr = regexp.MustCompile(`[\wа-яёА-ЯЁ]+[-\wа-яёА-ЯЁ]*`)
 
 func getTopSortedWords(words map[string]int, top int) []string {
 	type WordCounter struct {
@@ -47,14 +47,10 @@ func getTopSortedWords(words map[string]int, top int) []string {
 }
 
 func getWordsCountMap(text string) map[string]int {
-	wordsCountMap := make(map[string]int, 0)
+	wordsCountMap := make(map[string]int)
 	words := wordRegExpr.FindAllString(strings.ToLower(text), -1)
 	for _, s := range words {
-		if _, ok := wordsCountMap[s]; ok {
-			wordsCountMap[s] += 1
-		} else {
-			wordsCountMap[s] = 1
-		}
+		wordsCountMap[s]++
 	}
 
 	return wordsCountMap
