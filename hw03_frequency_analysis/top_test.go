@@ -129,4 +129,23 @@ func TestTop10(t *testing.T) {
 			p p p p p p p p p p p p p p p p p p p p p p p p p p p p p p p p p 
 		`))
 	})
+
+	t.Run("latin words with punctuation", func(t *testing.T) {
+		expected := []string{
+			"test",
+			"test_",
+			"test-",
+			"test-test",
+			"test_test",
+		}
+		require.Equal(t, expected, Top10(`
+			test! test@ test# test$ test% test^ test& test* test( test) test- test= 
+			Test. Test, <Test> Test Test; Test: 'Test' "Test" Test\ Test| Test/  
+			{Test} [Test] Test~ Test§ Test± Test+ Test_ Test Test Test Test  
+			tEst tEst tEst tEst tEst tEst tEst tEst tEst tEst tEst tEst_  
+			teSt teSt teSt teSt teSt teSt teSt teSt teSt teSt teSt teSt-  
+			tesT tesT tesT tesT tesT tesT tesT tesT tesT tesT tesT tesT_ 
+			test-test test_test test+test test~test
+		`))
+	})
 }
