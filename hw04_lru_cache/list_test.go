@@ -56,11 +56,11 @@ func TestList(t *testing.T) {
 
 		require.Equal(t, 4, l.Len())
 
-		elems := make([]int, 0, l.Len())
+		elems := make([]interface{}, 0, l.Len())
 		for i := l.Front(); i != nil; i = i.Next {
-			elems = append(elems, i.Value.(int))
+			elems = append(elems, i.Value)
 		}
-		require.Equal(t, []interface{}{1.23, 4, "Hello, Otus!", 'q'}, elems)
+		require.Equal(t, []interface{}{'q', "Hello, Otus!", 4, 1.23}, elems)
 	})
 
 	t.Run("items order", func(t *testing.T) {
@@ -68,7 +68,7 @@ func TestList(t *testing.T) {
 
 		l := NewList()
 		for i := 0; i < maxItems; i++ {
-			l.PushFront(i)
+			l.PushBack(i)
 		}
 		for i := 0; i < maxItems; i++ {
 			require.Equal(t, maxItems-i, l.Len())
@@ -83,13 +83,13 @@ func TestList(t *testing.T) {
 
 		l := NewList()
 		for i := 0; i < maxItems; i++ {
-			l.PushBack(i)
+			l.PushFront(i)
 		}
-		for i := maxItems - 1; i >= 0; i-- {
+		for i := maxItems; i > 0; i-- {
 			require.Equal(t, i, l.Len())
-			require.Equal(t, maxItems-i, l.Front().Value)
+			require.Equal(t, maxItems-i, l.Back().Value)
 
-			l.Remove(l.Front())
+			l.Remove(l.Back())
 		}
 	})
 

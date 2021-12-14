@@ -77,6 +77,12 @@ func (l *list) Remove(i *ListItem) {
 	if i.Prev != nil {
 		i.Prev.Next = i.Next
 	}
+	if l.frontItem == i {
+		l.frontItem = i.Next
+	}
+	if l.backItem == i {
+		l.backItem = i.Prev
+	}
 	i = nil
 	l.len--
 }
