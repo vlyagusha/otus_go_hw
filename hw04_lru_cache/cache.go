@@ -58,6 +58,7 @@ func (l *lruCache) Clear() {
 	l.capacity = 0
 	l.queue = NewList()
 	l.items = make(map[Key]*ListItem)
+	l.mutex = sync.RWMutex{}
 }
 
 func NewCache(capacity int) Cache {
