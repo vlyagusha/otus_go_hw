@@ -109,14 +109,14 @@ func TestCache(t *testing.T) {
 		require.True(t, ok)
 		require.Equal(t, 300, val)
 
-		_, _ = c.Get("bbb")
-		_, _ = c.Get("bbb")
-		_, _ = c.Get("bbb")
+		c.Get("bbb")
+		c.Get("bbb")
+		c.Get("bbb")
 
-		_, _ = c.Get("aaa")
-		_, _ = c.Get("aaa")
+		c.Get("aaa")
+		c.Get("aaa")
 
-		_ = c.Set("ddd", 400)
+		c.Set("ddd", 400)
 
 		val, ok = c.Get("ccc")
 		require.False(t, ok)
