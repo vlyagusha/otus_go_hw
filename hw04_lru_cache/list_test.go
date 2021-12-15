@@ -46,6 +46,27 @@ func TestList(t *testing.T) {
 		require.Equal(t, 1.23, l.Back().Value)
 	})
 
+	t.Run("swap items", func(t *testing.T) {
+		l := NewList()
+
+		l.PushFront("aaa")
+		l.PushFront("bbb")
+
+		l.MoveToFront(l.Front())
+		require.Equal(t, 2, l.Len())
+		require.Equal(t, "bbb", l.Front().Value)
+		require.Equal(t, "aaa", l.Back().Value)
+		require.Equal(t, l.Front().Next, l.Back())
+		require.Equal(t, l.Back().Prev, l.Front())
+
+		l.MoveToFront(l.Back())
+		require.Equal(t, 2, l.Len())
+		require.Equal(t, "aaa", l.Front().Value)
+		require.Equal(t, "bbb", l.Back().Value)
+		require.Equal(t, l.Front().Next, l.Back())
+		require.Equal(t, l.Back().Prev, l.Front())
+	})
+
 	t.Run("distinct type items", func(t *testing.T) {
 		l := NewList()
 
