@@ -14,64 +14,69 @@ type lruCache struct {
 	capacity int
 	queue    List
 	items    map[Key]*ListItem
-	mutex    sync.RWMutex
 }
 
+var mutex = sync.Mutex{}
+
 func (l *lruCache) Set(key Key, value interface{}) bool {
-	l.mutex.RLock()
+	mutex.Lock()
+
 	item, exists := l.items[key]
-	l.mutex.RUnlock()
-
 	if exists {
-		item.Value = value
+		item.Value = cacheItem{
+			Key:   key,
+			Value: value,
+		}
 
-		l.mutex.Lock()
 		l.queue.MoveToFront(item)
-		l.mutex.Unlock()
+		mutex.Unlock()
 
 		return true
 	}
 
-	l.mutex.Lock()
-	listItem := l.queue.PushFront(value)
+	listItem := l.queue.PushFront(cacheItem{
+		Key:   key,
+		Value: value,
+	})
 	l.items[key] = listItem
-	l.mutex.Unlock()
+
+	mutex.Unlock()
 
 	return false
 }
 
 func (l *lruCache) Get(key Key) (interface{}, bool) {
-	l.mutex.RLock()
+	mutex.Lock()
 	item, exists := l.items[key]
-	l.mutex.RUnlock()
 
 	if !exists {
+		mutex.Unlock()
+
 		return nil, false
 	}
 
-	l.mutex.Lock()
 	l.queue.MoveToFront(item)
-	l.mutex.Unlock()
+	mutex.Unlock()
 
-	return item.Value, true
+	return item.Value.(cacheItem).Value, true
 }
 
 func (l *lruCache) Clear() {
+	mutex.Lock()
 	l.queue = NewList()
 	l.items = make(map[Key]*ListItem, l.capacity)
-	l.mutex = sync.RWMutex{}
+	mutex.Unlock()
 }
 
-// type cacheItem struct {
-//	key   Key
-//	value interface{}
-// }
+type cacheItem struct {
+	Key   Key
+	Value interface{}
+}
 
 func NewCache(capacity int) Cache {
 	return &lruCache{
 		capacity: capacity,
 		queue:    NewList(),
 		items:    make(map[Key]*ListItem, capacity),
-		mutex:    sync.RWMutex{},
 	}
 }
