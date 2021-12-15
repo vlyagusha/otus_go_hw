@@ -24,8 +24,8 @@ func (l *lruCache) Set(key Key, value interface{}) bool {
 	item, exists := l.items[key]
 	if exists {
 		item.Value = cacheItem{
-			Key:   key,
-			Value: value,
+			key:   key,
+			value: value,
 		}
 
 		l.queue.MoveToFront(item)
@@ -35,11 +35,10 @@ func (l *lruCache) Set(key Key, value interface{}) bool {
 	}
 
 	listItem := l.queue.PushFront(cacheItem{
-		Key:   key,
-		Value: value,
+		key:   key,
+		value: value,
 	})
 	l.items[key] = listItem
-
 	mutex.Unlock()
 
 	return false
@@ -58,7 +57,7 @@ func (l *lruCache) Get(key Key) (interface{}, bool) {
 	l.queue.MoveToFront(item)
 	mutex.Unlock()
 
-	return item.Value.(cacheItem).Value, true
+	return item.Value.(cacheItem).value, true
 }
 
 func (l *lruCache) Clear() {
@@ -69,8 +68,8 @@ func (l *lruCache) Clear() {
 }
 
 type cacheItem struct {
-	Key   Key
-	Value interface{}
+	key   Key
+	value interface{}
 }
 
 func NewCache(capacity int) Cache {
