@@ -15,6 +15,105 @@ func TestList(t *testing.T) {
 		require.Nil(t, l.Back())
 	})
 
+	t.Run("only 1 item", func(t *testing.T) {
+		l := NewList()
+
+		l.PushFront("Go, baby, go!")
+		require.Equal(t, 1, l.Len())
+		require.Equal(t, "Go, baby, go!", l.Front().Value)
+		require.Equal(t, "Go, baby, go!", l.Back().Value)
+
+		l = NewList()
+
+		l.PushBack("Go, baby, go!")
+		require.Equal(t, 1, l.Len())
+		require.Equal(t, "Go, baby, go!", l.Front().Value)
+		require.Equal(t, "Go, baby, go!", l.Back().Value)
+	})
+
+	t.Run("moving to front single item", func(t *testing.T) {
+		l := NewList()
+
+		l.PushFront(1.23)
+		l.MoveToFront(l.Front())
+		require.Equal(t, 1, l.Len())
+		require.Equal(t, 1.23, l.Front().Value)
+		require.Equal(t, 1.23, l.Back().Value)
+
+		l.MoveToFront(l.Back())
+		require.Equal(t, 1, l.Len())
+		require.Equal(t, 1.23, l.Front().Value)
+		require.Equal(t, 1.23, l.Back().Value)
+	})
+
+	t.Run("swap items", func(t *testing.T) {
+		l := NewList()
+
+		l.PushFront("aaa")
+		l.PushFront("bbb")
+
+		l.MoveToFront(l.Front())
+		require.Equal(t, 2, l.Len())
+		require.Equal(t, "bbb", l.Front().Value)
+		require.Equal(t, "aaa", l.Back().Value)
+		require.Equal(t, l.Front().Next, l.Back())
+		require.Equal(t, l.Back().Prev, l.Front())
+
+		l.MoveToFront(l.Back())
+		require.Equal(t, 2, l.Len())
+		require.Equal(t, "aaa", l.Front().Value)
+		require.Equal(t, "bbb", l.Back().Value)
+		require.Equal(t, l.Front().Next, l.Back())
+		require.Equal(t, l.Back().Prev, l.Front())
+	})
+
+	t.Run("distinct type items", func(t *testing.T) {
+		l := NewList()
+
+		l.PushFront(1.23)
+		l.PushFront(4)
+		l.PushFront("Hello, Otus!")
+		l.PushFront('q')
+
+		require.Equal(t, 4, l.Len())
+
+		elems := make([]interface{}, 0, l.Len())
+		for i := l.Front(); i != nil; i = i.Next {
+			elems = append(elems, i.Value)
+		}
+		require.Equal(t, []interface{}{'q', "Hello, Otus!", 4, 1.23}, elems)
+	})
+
+	t.Run("items order", func(t *testing.T) {
+		const maxItems = 10
+
+		l := NewList()
+		for i := 0; i < maxItems; i++ {
+			l.PushBack(i)
+		}
+		for i := 0; i < maxItems; i++ {
+			require.Equal(t, maxItems-i, l.Len())
+			require.Equal(t, i, l.Front().Value)
+
+			l.Remove(l.Front())
+		}
+	})
+
+	t.Run("items reverse order", func(t *testing.T) {
+		const maxItems = 10
+
+		l := NewList()
+		for i := 0; i < maxItems; i++ {
+			l.PushFront(i)
+		}
+		for i := maxItems; i > 0; i-- {
+			require.Equal(t, i, l.Len())
+			require.Equal(t, maxItems-i, l.Back().Value)
+
+			l.Remove(l.Back())
+		}
+	})
+
 	t.Run("complex", func(t *testing.T) {
 		l := NewList()
 
