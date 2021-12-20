@@ -23,7 +23,7 @@ type CacheMultithreading struct {
 func (c *CacheMultithreading) Set(key Key, value interface{}) bool {
 	c.mutex.Lock()
 	was := c.cache.Set(key, value)
-	c.mutex.Unlock()
+	defer c.mutex.Unlock()
 
 	return was
 }
@@ -31,7 +31,7 @@ func (c *CacheMultithreading) Set(key Key, value interface{}) bool {
 func (c *CacheMultithreading) Get(key Key) (interface{}, bool) {
 	c.mutex.Lock()
 	value, exists := c.cache.Get(key)
-	c.mutex.Unlock()
+	defer c.mutex.Unlock()
 
 	return value, exists
 }
@@ -39,7 +39,7 @@ func (c *CacheMultithreading) Get(key Key) (interface{}, bool) {
 func (c *CacheMultithreading) Clear() {
 	c.mutex.Lock()
 	c.cache.Clear()
-	c.mutex.Unlock()
+	defer c.mutex.Unlock()
 }
 
 type lruCache struct {
