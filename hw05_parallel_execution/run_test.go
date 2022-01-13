@@ -61,6 +61,10 @@ func TestRun(t *testing.T) {
 		require.LessOrEqual(t, runTasksCount, int32(workersCount+maxErrorsCount), "extra tasks were started")
 		require.Equal(t, runTasksCount, int32(tasksCount), "not all tasks were completed")
 	})
+}
+
+func TestRunWithoutErrors(t *testing.T) {
+	defer goleak.VerifyNone(t)
 
 	t.Run("tasks without errors", func(t *testing.T) {
 		tasksCount := 50
@@ -121,6 +125,10 @@ func TestRun(t *testing.T) {
 		require.Equal(t, runTasksCount, int32(tasksCount), "not all tasks were completed")
 		require.LessOrEqual(t, int64(elapsedTime), int64(sumTime/2), "tasks were run sequentially?")
 	})
+}
+
+func TestRunIgnoreErrors(t *testing.T) {
+	defer goleak.VerifyNone(t)
 
 	t.Run("if M < 0, than ignore errors", func(t *testing.T) {
 		tasksCount := 50
