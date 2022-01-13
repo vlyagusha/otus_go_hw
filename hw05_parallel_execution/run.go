@@ -2,7 +2,6 @@ package hw05parallelexecution
 
 import (
 	"errors"
-	"fmt"
 	"sync"
 	"sync/atomic"
 )
@@ -13,20 +12,22 @@ type Task func() error
 
 // Run starts tasks in n goroutines and stops its work when receiving m errors from tasks.
 func Run(tasks []Task, n, m int) error {
+	if m <= 0 {
+		m = len(tasks)
+	}
 	errorsCount := int32(m)
 
 	tasksCh := make(chan Task)
 	wg := sync.WaitGroup{}
 
 	go func() {
+		defer close(tasksCh)
 		for _, task := range tasks {
 			if atomic.LoadInt32(&errorsCount) <= 0 {
-				close(tasksCh)
 				return
 			}
 			tasksCh <- task
 		}
-		close(tasksCh)
 	}()
 
 	for i := 0; i < n; i++ {
@@ -47,11 +48,8 @@ func Run(tasks []Task, n, m int) error {
 
 	wg.Wait()
 
-	fmt.Println(atomic.LoadInt32(&errorsCount))
-
 	if atomic.LoadInt32(&errorsCount) <= 0 {
 		return ErrErrorsLimitExceeded
 	}
-
 	return nil
 }
