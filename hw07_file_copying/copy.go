@@ -21,15 +21,15 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 	}
 	defer fileRead.Close()
 
-	fileInfo, err := fileRead.Stat()
+	stat, err := fileRead.Stat()
 	if err != nil {
 		return err
 	}
 
-	if (fileInfo.Mode() & os.ModeType) != 0 {
+	if (stat.Mode() & os.ModeType) != 0 {
 		return ErrUnsupportedFile
 	}
-	if fileInfo.Size() < offset {
+	if stat.Size() < offset {
 		return ErrOffsetExceedsFileSize
 	}
 
