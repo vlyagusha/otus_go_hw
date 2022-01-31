@@ -19,11 +19,25 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 	if err != nil {
 		return err
 	}
+	defer fileRead.Close()
+
+	fileInfo, err := fileRead.Stat()
+	if err != nil {
+		return err
+	}
+
+	if (fileInfo.Mode() & os.ModeType) != 0 {
+		return ErrUnsupportedFile
+	}
+	if fileInfo.Size() < offset {
+		return ErrOffsetExceedsFileSize
+	}
 
 	fileWrite, err = os.Create(toPath)
 	if err != nil {
 		return err
 	}
+	defer fileWrite.Close()
 
 	buf := make([]byte, 1024)
 	_, err = fileRead.Seek(offset, io.SeekStart)
@@ -53,19 +67,6 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 			return err
 		}
 	}
-
-	defer func() error {
-		err = fileRead.Close()
-		if err != nil {
-			return err
-		}
-
-		err = fileWrite.Close()
-		if err != nil {
-			return err
-		}
-		return nil
-	}()
 
 	return nil
 }
