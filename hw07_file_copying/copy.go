@@ -52,9 +52,9 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 	defer fileWriter.Close()
 
 	bar := pb.Full.Start64(limit)
-	barReader := bar.NewProxyReader(fileReader)
 	defer bar.Finish()
 
+	barReader := bar.NewProxyReader(fileReader)
 	_, err = io.CopyN(fileWriter, barReader, limit)
 	if err != nil && !errors.Is(err, io.EOF) {
 		return err
