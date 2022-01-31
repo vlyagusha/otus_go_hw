@@ -56,7 +56,7 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 	defer bar.Finish()
 
 	_, err = io.CopyN(fileWriter, barReader, limit)
-	if err != nil && err != io.EOF {
+	if err != nil && !errors.Is(err, io.EOF) {
 		return err
 	}
 
