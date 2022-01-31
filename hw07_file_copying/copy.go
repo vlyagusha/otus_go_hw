@@ -4,6 +4,8 @@ import (
 	"errors"
 	"io"
 	"os"
+
+	"github.com/cheggaaa/pb/v3"
 )
 
 var (
@@ -12,16 +14,16 @@ var (
 )
 
 func Copy(fromPath, toPath string, offset, limit int64) error {
-	var fileRead, fileWrite *os.File
+	var fileReader, fileWriter *os.File
 	var err error
 
-	fileRead, err = os.OpenFile(fromPath, os.O_RDONLY, 0o644)
+	fileReader, err = os.OpenFile(fromPath, os.O_RDONLY, 0o644)
 	if err != nil {
 		return err
 	}
-	defer fileRead.Close()
+	defer fileReader.Close()
 
-	stat, err := fileRead.Stat()
+	stat, err := fileReader.Stat()
 	if err != nil {
 		return err
 	}
@@ -33,39 +35,29 @@ func Copy(fromPath, toPath string, offset, limit int64) error {
 		return ErrOffsetExceedsFileSize
 	}
 
-	fileWrite, err = os.Create(toPath)
+	bytesToRead := stat.Size() - offset
+	if limit == 0 || limit > bytesToRead {
+		limit = bytesToRead
+	}
+
+	_, err = fileReader.Seek(offset, io.SeekStart)
 	if err != nil {
 		return err
 	}
-	defer fileWrite.Close()
 
-	buf := make([]byte, 1024)
-	_, err = fileRead.Seek(offset, io.SeekStart)
+	fileWriter, err = os.Create(toPath)
 	if err != nil {
 		return err
 	}
+	defer fileWriter.Close()
 
-	for {
-		read, err := fileRead.Read(buf)
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			return err
-		}
-		if limit > 0 && int64(read) >= limit {
-			_, err := fileWrite.Write(buf[:limit])
-			if err != nil {
-				return err
-			}
-			break
-		}
-		limit -= int64(read)
+	bar := pb.Full.Start64(limit)
+	barReader := bar.NewProxyReader(fileReader)
+	defer bar.Finish()
 
-		_, err = fileWrite.Write(buf[:read])
-		if err != nil {
-			return err
-		}
+	_, err = io.CopyN(fileWriter, barReader, limit)
+	if err != nil && err != io.EOF {
+		return err
 	}
 
 	return nil
