@@ -1,5 +1,8 @@
 package main
 
+import "os"
+
 func main() {
-	// Place your code here.
+	environment, _ := ReadDir(os.Args[1])
+	os.Exit(RunCmd(os.Args[2:], environment))
 }
