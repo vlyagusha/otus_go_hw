@@ -24,5 +24,9 @@ arguments are arg1=1 arg2=2'
 result=$("$(pwd)/testdata/echo_error.sh")
 [ "${result}" = "1" ] || (echo -e "invalid output: ${result}" && exit 1)
 
+result=$(echo 'Pipelined input' | ./go-envdir "$(pwd)/testdata/env" "cat")
+expected='Pipelined input'
+[ "${result}" = "${expected}" ] || (echo -e "invalid output: ${result}" && exit 1)
+
 rm -f go-envdir
 echo "PASS"
