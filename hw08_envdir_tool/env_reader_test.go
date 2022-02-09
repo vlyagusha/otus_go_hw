@@ -7,13 +7,6 @@ import (
 )
 
 func TestReadDir(t *testing.T) {
-	t.Run("test empty dir", func(t *testing.T) {
-		environment, err := ReadDir("./testdata/env_empty")
-
-		require.NoError(t, err)
-		require.Equal(t, 0, len(environment))
-	})
-
 	t.Run("simple test", func(t *testing.T) {
 		environment, err := ReadDir("./testdata/env")
 
@@ -53,5 +46,11 @@ func TestReadDir(t *testing.T) {
 
 		require.Error(t, err)
 		require.ErrorIs(t, err, ErrUnsupportedFile)
+	})
+
+	t.Run("error: dir doesnt exist", func(t *testing.T) {
+		_, err := ReadDir("./testdata/env_doesnt_exist")
+
+		require.Error(t, err)
 	})
 }
