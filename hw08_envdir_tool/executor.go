@@ -25,11 +25,14 @@ func RunCmd(cmd []string, env Environment) (returnCode int) {
 			}
 		}
 	}
+
 	command.Env = os.Environ()
 	command.Stdin = os.Stdin
 	command.Stdout = os.Stdout
 	if err := command.Run(); err != nil {
-		return 1
+		if exitError, ok := err.(*exec.ExitError); ok { // nolint:errorlint
+			return exitError.ExitCode()
+		}
 	}
 
 	return 0
