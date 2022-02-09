@@ -17,6 +17,11 @@ type EnvValue struct {
 	NeedRemove bool
 }
 
+var (
+	ErrUnsupportedFile       = errors.New("unsupported file")
+	ErrIllegalCharInFileName = errors.New("illegal char in file name")
+)
+
 // ReadDir reads a specified directory and returns map of env variables.
 // Variables represented as files where filename is name of variable, file first line is a value.
 func ReadDir(dir string) (Environment, error) {
@@ -28,12 +33,16 @@ func ReadDir(dir string) (Environment, error) {
 	environment := make(Environment)
 	for _, dirEntry := range dirEntries {
 		if (dirEntry.Type() & os.ModeType) != 0 {
-			continue
+			return nil, ErrUnsupportedFile
+		}
+
+		if strings.Contains(dirEntry.Name(), "=") {
+			return nil, ErrIllegalCharInFileName
 		}
 
 		value, err := getValue(dir + "/" + dirEntry.Name())
 		if err != nil && !errors.Is(err, io.EOF) {
-			continue
+			return nil, err
 		}
 
 		environment[dirEntry.Name()] = EnvValue{

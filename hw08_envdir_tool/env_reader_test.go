@@ -7,6 +7,13 @@ import (
 )
 
 func TestReadDir(t *testing.T) {
+	t.Run("test empty dir", func(t *testing.T) {
+		environment, err := ReadDir("./testdata/env_empty")
+
+		require.NoError(t, err)
+		require.Equal(t, 0, len(environment))
+	})
+
 	t.Run("simple test", func(t *testing.T) {
 		environment, err := ReadDir("./testdata/env")
 
@@ -32,5 +39,19 @@ func TestReadDir(t *testing.T) {
 			Value:      "",
 			NeedRemove: true,
 		}, environment["UNSET"])
+	})
+
+	t.Run("error: illegal char in filename", func(t *testing.T) {
+		_, err := ReadDir("./testdata/env2")
+
+		require.Error(t, err)
+		require.ErrorIs(t, err, ErrIllegalCharInFileName)
+	})
+
+	t.Run("error: unsupported file", func(t *testing.T) {
+		_, err := ReadDir("./testdata/env3")
+
+		require.Error(t, err)
+		require.ErrorIs(t, err, ErrUnsupportedFile)
 	})
 }
