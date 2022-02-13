@@ -6,6 +6,7 @@ import (
 	"errors"
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -40,7 +41,7 @@ func ReadDir(dir string) (Environment, error) {
 			return nil, ErrIllegalCharInFileName
 		}
 
-		value, err := getValue(dir + "/" + dirEntry.Name())
+		value, err := getValue(filepath.Join(dir, dirEntry.Name()))
 		if err != nil && !errors.Is(err, io.EOF) {
 			return nil, err
 		}
