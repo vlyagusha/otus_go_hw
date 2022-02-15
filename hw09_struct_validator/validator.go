@@ -23,7 +23,7 @@ func (v ValidationErrors) Error() string {
 }
 
 func Validate(v interface{}) error {
-	validationErrors := make(ValidationErrors, 0)
+	var validationErrors ValidationErrors
 	rv := reflect.ValueOf(v)
 
 	if rv.Kind() != reflect.Struct {
@@ -39,12 +39,14 @@ func Validate(v interface{}) error {
 		}
 
 		var err error
-		val := rv.Field(i)
-		switch val.Kind() { // nolint:exhaustive
+		value := rv.Field(i)
+		switch value.Kind() { // nolint:exhaustive
 		case reflect.String:
-			err = ValidatorStr(val.String(), frv.Name, vTags)
+			err = ValidatorStr(value.String(), frv.Name, vTags)
 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-			err = ValidatorInt(val.Int(), frv.Name, vTags)
+			err = ValidatorInt(value.Int(), frv.Name, vTags)
+		case reflect.Array, reflect.Slice:
+			err = ValidatorArray(value.Interface(), frv.Name, vTags)
 		}
 
 		if err == nil {

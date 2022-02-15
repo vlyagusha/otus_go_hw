@@ -37,6 +37,10 @@ type (
 		Code int    `validate:"in:200,404,500"`
 		Body string `json:"omitempty"`
 	}
+
+	SuccessResponses struct {
+		Codes []int `validate:"in:200,201,202,203,204,205,206,207,208,226"`
+	}
 )
 
 func TestValidate(t *testing.T) {
@@ -71,7 +75,7 @@ func TestValidate(t *testing.T) {
 				Age:    17,
 				Email:  "mailexample.com",
 				Role:   "admin2",
-				Phones: []string{"79101234567"},
+				Phones: []string{"9101234567", "-"},
 				meta:   nil,
 			},
 			expectedErr: ValidationErrors{
@@ -90,6 +94,78 @@ func TestValidate(t *testing.T) {
 				ValidationError{
 					Field: "Role",
 					Err:   ErrStrIn,
+				},
+				ValidationError{
+					Field: "Phones",
+					Err:   ErrStrLen,
+				},
+				ValidationError{
+					Field: "Phones",
+					Err:   ErrStrLen,
+				},
+			},
+		},
+		{
+			in:          App{Version: "1.0.0"},
+			expectedErr: nil,
+		},
+		{
+			in:          App{Version: "v1.0.0"},
+			expectedErr: ValidationErrors{ValidationError{Field: "Version", Err: ErrStrLen}},
+		},
+		{
+			in: Token{
+				Header:    nil,
+				Payload:   nil,
+				Signature: nil,
+			},
+			expectedErr: nil,
+		},
+		{
+			in: Token{
+				Header:    []byte{'1', '2', '3'},
+				Payload:   []byte{'a', 'b', 'c'},
+				Signature: []byte{'!', '@', '#'},
+			},
+			expectedErr: nil,
+		},
+		{
+			in: Response{
+				Code: 200,
+				Body: "OK",
+			},
+			expectedErr: nil,
+		},
+		{
+			in: Response{
+				Code: 201,
+				Body: "Created",
+			},
+			expectedErr: ValidationErrors{ValidationError{Field: "Code", Err: ErrIntIn}},
+		},
+		{
+			in:          SuccessResponses{Codes: []int{200, 201}},
+			expectedErr: nil,
+		},
+		{
+			in: SuccessResponses{Codes: []int{400, 404}},
+			expectedErr: ValidationErrors{
+				ValidationError{
+					Field: "Codes",
+					Err:   ErrIntIn,
+				},
+				ValidationError{
+					Field: "Codes",
+					Err:   ErrIntIn,
+				},
+			},
+		},
+		{
+			in: SuccessResponses{Codes: []int{203, 503}},
+			expectedErr: ValidationErrors{
+				ValidationError{
+					Field: "Codes",
+					Err:   ErrIntIn,
 				},
 			},
 		},
