@@ -3,7 +3,10 @@ package hw09structvalidator
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 type UserRole string
@@ -71,10 +74,24 @@ func TestValidate(t *testing.T) {
 				Phones: []string{"79101234567"},
 				meta:   nil,
 			},
-			expectedErr: ValidationErrors{ValidationError{
-				Field: "ID",
-				Err:   nil,
-			}},
+			expectedErr: ValidationErrors{
+				ValidationError{
+					Field: "ID",
+					Err:   ErrStrLen,
+				},
+				ValidationError{
+					Field: "Age",
+					Err:   ErrIntMin,
+				},
+				ValidationError{
+					Field: "Email",
+					Err:   ErrStrRegexp,
+				},
+				ValidationError{
+					Field: "Role",
+					Err:   ErrStrIn,
+				},
+			},
 		},
 	}
 
@@ -84,8 +101,7 @@ func TestValidate(t *testing.T) {
 			t.Parallel()
 
 			err := Validate(tt.in)
-			// require.True(t, errors.Is(err, tt.expectedErr))
-			fmt.Println(err)
+			require.True(t, reflect.DeepEqual(err, tt.expectedErr))
 		})
 	}
 }

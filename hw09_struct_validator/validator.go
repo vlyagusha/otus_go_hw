@@ -18,10 +18,10 @@ type ValidationErrors []ValidationError
 func (v ValidationErrors) Error() string {
 	res := ""
 	for _, validationError := range v {
-		res = res + validationError.Field + " " + validationError.Err.Error() + "\n"
+		res = res + validationError.Field + ": " + validationError.Err.Error() + "\n"
 	}
 
-	return res
+	return strings.TrimRight(res, "\n")
 }
 
 func Validate(v interface{}) error {
@@ -54,8 +54,7 @@ func Validate(v interface{}) error {
 					if err != nil {
 						return err
 					}
-					err = strLenValidator(length, fieldVal)
-					if err != nil {
+					if err = strLenValidator(length, fieldVal); err != nil {
 						validationErrors = append(validationErrors, ValidationError{
 							Field: frv.Name,
 							Err:   err,
@@ -66,17 +65,14 @@ func Validate(v interface{}) error {
 					if err != nil {
 						return err
 					}
-
-					err = strRegexpValidator(compile, fieldVal)
-					if err != nil {
+					if err = strRegexpValidator(compile, fieldVal); err != nil {
 						validationErrors = append(validationErrors, ValidationError{
 							Field: frv.Name,
 							Err:   err,
 						})
 					}
 				case "in":
-					err := strInValidator(strings.Split(tagVal, ","), fieldVal)
-					if err != nil {
+					if err := strInValidator(strings.Split(tagVal, ","), fieldVal); err != nil {
 						validationErrors = append(validationErrors, ValidationError{
 							Field: frv.Name,
 							Err:   err,
@@ -97,8 +93,7 @@ func Validate(v interface{}) error {
 					if err != nil {
 						return err
 					}
-					err = intMinValidator(int64(minVal), fieldVal)
-					if err != nil {
+					if err = intMinValidator(int64(minVal), fieldVal); err != nil {
 						validationErrors = append(validationErrors, ValidationError{
 							Field: frv.Name,
 							Err:   err,
@@ -109,8 +104,7 @@ func Validate(v interface{}) error {
 					if err != nil {
 						return err
 					}
-					err = intMaxValidator(int64(maxVal), fieldVal)
-					if err != nil {
+					if err = intMaxValidator(int64(maxVal), fieldVal); err != nil {
 						validationErrors = append(validationErrors, ValidationError{
 							Field: frv.Name,
 							Err:   err,
@@ -126,8 +120,7 @@ func Validate(v interface{}) error {
 						}
 						ints[i] = int64(intVal)
 					}
-					err := intInValidator(ints, fieldVal)
-					if err != nil {
+					if err := intInValidator(ints, fieldVal); err != nil {
 						validationErrors = append(validationErrors, ValidationError{
 							Field: frv.Name,
 							Err:   err,
@@ -141,22 +134,30 @@ func Validate(v interface{}) error {
 	if len(validationErrors) > 0 {
 		return validationErrors
 	}
-
 	return nil
 }
+
+var (
+	ErrStrLen    = errors.New("str length validation error")
+	ErrStrRegexp = errors.New("str regexp validation error")
+	ErrStrIn     = errors.New("str in validation error")
+	ErrIntMin    = errors.New("int min validation error")
+	ErrIntMax    = errors.New("int max validation error")
+	ErrIntIn     = errors.New("int in validation error")
+)
 
 func strLenValidator(length int, val string) error {
 	if len(val) == length {
 		return nil
 	}
-	return errors.New("str length validation error")
+	return ErrStrLen
 }
 
 func strRegexpValidator(compile *regexp.Regexp, val string) error {
 	if compile.Match([]byte(val)) {
 		return nil
 	}
-	return errors.New("str regexp validation error")
+	return ErrStrRegexp
 }
 
 func strInValidator(values []string, val string) error {
@@ -165,21 +166,21 @@ func strInValidator(values []string, val string) error {
 			return nil
 		}
 	}
-	return errors.New("str in validation error")
+	return ErrStrIn
 }
 
 func intMinValidator(minVal, val int64) error {
 	if val >= minVal {
 		return nil
 	}
-	return errors.New("int min validation error")
+	return ErrIntMin
 }
 
 func intMaxValidator(maxVal, val int64) error {
 	if val <= maxVal {
 		return nil
 	}
-	return errors.New("int max validation error")
+	return ErrIntMax
 }
 
 func intInValidator(values []int64, val int64) error {
@@ -188,5 +189,5 @@ func intInValidator(values []int64, val int64) error {
 			return nil
 		}
 	}
-	return errors.New("int in validation error")
+	return ErrIntIn
 }
