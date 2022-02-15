@@ -49,7 +49,7 @@ func Validate(v interface{}) error {
 				return err
 			}
 			validationErrors = append(validationErrors, err.(ValidationErrors)...) // nolint:errorlint
-		case reflect.Int:
+		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 			err := ValidatorInt(val.Int(), frv.Name, vTags)
 			if err == nil {
 				continue
