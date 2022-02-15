@@ -42,10 +42,40 @@ func TestValidate(t *testing.T) {
 		expectedErr error
 	}{
 		{
-			// Place your code here.
+			in:          200,
+			expectedErr: nil,
 		},
-		// ...
-		// Place your code here.
+		{
+			in:          "HTTP 200 OK",
+			expectedErr: nil,
+		},
+		{
+			in: User{
+				ID:     "ff829198-8db4-11ec-b909-0242ac120002",
+				Name:   "John",
+				Age:    30,
+				Email:  "mail@example.com",
+				Role:   "admin",
+				Phones: []string{"79101234567"},
+				meta:   nil,
+			},
+			expectedErr: nil,
+		},
+		{
+			in: User{
+				ID:     "ff829198-8db4-11ec-b909",
+				Name:   "John",
+				Age:    17,
+				Email:  "mailexample.com",
+				Role:   "admin2",
+				Phones: []string{"79101234567"},
+				meta:   nil,
+			},
+			expectedErr: ValidationErrors{ValidationError{
+				Field: "ID",
+				Err:   nil,
+			}},
+		},
 	}
 
 	for i, tt := range tests {
@@ -53,8 +83,9 @@ func TestValidate(t *testing.T) {
 			tt := tt
 			t.Parallel()
 
-			// Place your code here.
-			_ = tt
+			err := Validate(tt.in)
+			// require.True(t, errors.Is(err, tt.expectedErr))
+			fmt.Println(err)
 		})
 	}
 }
