@@ -39,7 +39,7 @@ func Validate(v interface{}) error {
 		}
 
 		val := rv.Field(i)
-		switch val.Kind() {
+		switch val.Kind() { // nolint:exhaustive
 		case reflect.String:
 			err := ValidatorStr(val.String(), frv.Name, vTags)
 			if err == nil {
@@ -48,7 +48,7 @@ func Validate(v interface{}) error {
 			if !errors.As(err, &ValidationErrors{}) {
 				return err
 			}
-			validationErrors = append(validationErrors, err.(ValidationErrors)...)
+			validationErrors = append(validationErrors, err.(ValidationErrors)...) // nolint:errorlint
 		case reflect.Int:
 			err := ValidatorInt(val.Int(), frv.Name, vTags)
 			if err == nil {
@@ -57,7 +57,7 @@ func Validate(v interface{}) error {
 			if !errors.As(err, &ValidationErrors{}) {
 				return err
 			}
-			validationErrors = append(validationErrors, err.(ValidationErrors)...)
+			validationErrors = append(validationErrors, err.(ValidationErrors)...) // nolint:errorlint
 		}
 	}
 
