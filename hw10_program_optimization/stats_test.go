@@ -19,6 +19,9 @@ func TestGetDomainStat(t *testing.T) {
 
 	dataWithError := `{{"Id":1,"Name":"Howard Mendoza","Username":"0Oliver","Email":"aliquid_qui_ea@Browsedrive.gov","Phone":"6-866-899-36-79","Password":"InAQJvsq","Address":"Blackbird Place 25"}`
 
+	dataMixedErrorAndCorrect := `{{"Id":1,"Name":"Howard Mendoza","Username":"0Oliver","Email":"aliquid_qui_ea@Browsedrive.gov","Phone":"6-866-899-36-79","Password":"InAQJvsq","Address":"Blackbird Place 25"}
+{"Id":2,"Name":"Jesse Vasquez","Username":"qRichardson","Email":"mLynch@broWsecat.com","Phone":"9-373-949-64-00","Password":"SiZLeNSGn","Address":"Fulton Hill 80"}`
+
 	t.Run("find 'com'", func(t *testing.T) {
 		result, err := GetDomainStat(bytes.NewBufferString(data), "com")
 		require.NoError(t, err)
@@ -47,6 +50,16 @@ func TestGetDomainStat(t *testing.T) {
 
 	t.Run("error data test - no error", func(t *testing.T) {
 		_, err := GetDomainStat(bytes.NewBufferString(dataWithError), "com")
+		require.NoError(t, err)
+	})
+
+	t.Run("error data test - got error", func(t *testing.T) {
+		_, err := GetDomainStat(bytes.NewBufferString(dataMixedErrorAndCorrect), "gov")
+		require.Error(t, err)
+	})
+
+	t.Run("error data test - no error", func(t *testing.T) {
+		_, err := GetDomainStat(bytes.NewBufferString(dataMixedErrorAndCorrect), "com")
 		require.NoError(t, err)
 	})
 }
