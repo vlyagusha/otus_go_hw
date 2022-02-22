@@ -14,12 +14,15 @@ type ValidationError struct {
 type ValidationErrors []ValidationError
 
 func (v ValidationErrors) Error() string {
-	res := ""
+	res := strings.Builder{}
 	for _, validationError := range v {
-		res = res + validationError.Field + ": " + validationError.Err.Error() + "\n"
+		res.WriteString(validationError.Field)
+		res.WriteString(": ")
+		res.WriteString(validationError.Err.Error())
+		res.WriteString("\n")
 	}
 
-	return strings.TrimRight(res, "\n")
+	return strings.TrimRight(res.String(), "\n")
 }
 
 func Validate(v interface{}) error {

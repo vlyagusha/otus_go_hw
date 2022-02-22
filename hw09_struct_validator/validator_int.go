@@ -16,6 +16,9 @@ func ValidatorInt(fieldVal int64, fieldName, vTags string) error {
 	validationErrors := make(ValidationErrors, 0)
 	for _, vTag := range strings.Split(vTags, "|") {
 		tagParts := strings.SplitN(vTag, ":", 2)
+		if len(tagParts) != 2 {
+			return errors.New("incorrect validation tag")
+		}
 		tagName := tagParts[0]
 		tagVal := tagParts[1]
 
