@@ -3,7 +3,10 @@ package hw09structvalidator
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 type UserRole string
@@ -34,6 +37,10 @@ type (
 		Code int    `validate:"in:200,404,500"`
 		Body string `json:"omitempty"`
 	}
+
+	SuccessResponses struct {
+		Codes []int `validate:"in:200,201,202,203,204,205,206,207,208,226"`
+	}
 )
 
 func TestValidate(t *testing.T) {
@@ -42,10 +49,126 @@ func TestValidate(t *testing.T) {
 		expectedErr error
 	}{
 		{
-			// Place your code here.
+			in:          200,
+			expectedErr: nil,
 		},
-		// ...
-		// Place your code here.
+		{
+			in:          "HTTP 200 OK",
+			expectedErr: nil,
+		},
+		{
+			in: User{
+				ID:     "ff829198-8db4-11ec-b909-0242ac120002",
+				Name:   "John",
+				Age:    30,
+				Email:  "mail@example.com",
+				Role:   "admin",
+				Phones: []string{"79101234567"},
+				meta:   nil,
+			},
+			expectedErr: nil,
+		},
+		{
+			in: User{
+				ID:     "ff829198-8db4-11ec-b909",
+				Name:   "John",
+				Age:    17,
+				Email:  "mailexample.com",
+				Role:   "admin2",
+				Phones: []string{"9101234567", "-"},
+				meta:   nil,
+			},
+			expectedErr: ValidationErrors{
+				ValidationError{
+					Field: "ID",
+					Err:   ErrStrLen,
+				},
+				ValidationError{
+					Field: "Age",
+					Err:   ErrIntMin,
+				},
+				ValidationError{
+					Field: "Email",
+					Err:   ErrStrRegexp,
+				},
+				ValidationError{
+					Field: "Role",
+					Err:   ErrStrIn,
+				},
+				ValidationError{
+					Field: "Phones",
+					Err:   ErrStrLen,
+				},
+				ValidationError{
+					Field: "Phones",
+					Err:   ErrStrLen,
+				},
+			},
+		},
+		{
+			in:          App{Version: "1.0.0"},
+			expectedErr: nil,
+		},
+		{
+			in:          App{Version: "v1.0.0"},
+			expectedErr: ValidationErrors{ValidationError{Field: "Version", Err: ErrStrLen}},
+		},
+		{
+			in: Token{
+				Header:    nil,
+				Payload:   nil,
+				Signature: nil,
+			},
+			expectedErr: nil,
+		},
+		{
+			in: Token{
+				Header:    []byte{'1', '2', '3'},
+				Payload:   []byte{'a', 'b', 'c'},
+				Signature: []byte{'!', '@', '#'},
+			},
+			expectedErr: nil,
+		},
+		{
+			in: Response{
+				Code: 200,
+				Body: "OK",
+			},
+			expectedErr: nil,
+		},
+		{
+			in: Response{
+				Code: 201,
+				Body: "Created",
+			},
+			expectedErr: ValidationErrors{ValidationError{Field: "Code", Err: ErrIntIn}},
+		},
+		{
+			in:          SuccessResponses{Codes: []int{200, 201}},
+			expectedErr: nil,
+		},
+		{
+			in: SuccessResponses{Codes: []int{400, 404}},
+			expectedErr: ValidationErrors{
+				ValidationError{
+					Field: "Codes",
+					Err:   ErrIntIn,
+				},
+				ValidationError{
+					Field: "Codes",
+					Err:   ErrIntIn,
+				},
+			},
+		},
+		{
+			in: SuccessResponses{Codes: []int{203, 503}},
+			expectedErr: ValidationErrors{
+				ValidationError{
+					Field: "Codes",
+					Err:   ErrIntIn,
+				},
+			},
+		},
 	}
 
 	for i, tt := range tests {
@@ -53,8 +176,8 @@ func TestValidate(t *testing.T) {
 			tt := tt
 			t.Parallel()
 
-			// Place your code here.
-			_ = tt
+			err := Validate(tt.in)
+			require.True(t, reflect.DeepEqual(err, tt.expectedErr))
 		})
 	}
 }
