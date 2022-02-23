@@ -1,0 +1,7 @@
+goos: darwin
+goarch: amd64
+pkg: github.com/fixme_my_friend/hw10_program_optimization
+cpu: Intel(R) Core(TM) i5-1038NG7 CPU @ 2.00GHz
+BenchmarkGetDomainStat-8   	      48	 229639257 ns/op	132846644 B/op	 1700096 allocs/op
+PASS
+ok  	github.com/fixme_my_friend/hw10_program_optimization	12.477s
