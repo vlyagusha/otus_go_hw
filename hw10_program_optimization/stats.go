@@ -2,6 +2,7 @@ package hw10programoptimization
 
 import (
 	"bufio"
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -35,13 +36,13 @@ func GetDomainStatNew(r io.Reader, domain string) (DomainStat, error) {
 	scanner := bufio.NewScanner(r)
 	scanner.Split(bufio.ScanLines)
 	for scanner.Scan() {
-		line := scanner.Text()
-		if !strings.Contains(line, domain) {
+		line := scanner.Bytes()
+		if !bytes.Contains(line, []byte(domain)) {
 			continue
 		}
 
 		var user User
-		if err := jsoniter.Unmarshal([]byte(line), &user); err != nil {
+		if err := jsoniter.Unmarshal(line, &user); err != nil {
 			return nil, err
 		}
 
