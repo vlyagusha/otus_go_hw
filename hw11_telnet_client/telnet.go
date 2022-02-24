@@ -2,8 +2,10 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"net"
+	"os"
 	"time"
 )
 
@@ -13,8 +15,6 @@ type TelnetClient interface {
 	Send() error
 	Receive() error
 }
-
-var ErrNotConnected = errors.New("not connected")
 
 func NewTelnetClient(address string, timeout time.Duration, in io.ReadCloser, out io.Writer) TelnetClient {
 	return &MyTelnetClient{
@@ -34,38 +34,38 @@ type MyTelnetClient struct {
 	conn    net.Conn
 }
 
-func (m *MyTelnetClient) Connect() error {
-	conn, err := net.DialTimeout("tcp", m.address, m.timeout)
+func (m *MyTelnetClient) Connect() (err error) {
+	m.conn, err = net.DialTimeout("tcp", m.address, m.timeout)
 	if err != nil {
 		return err
 	}
-	m.conn = conn
-	return nil
+	fmt.Fprintln(os.Stderr, "...Connected to "+m.address)
+	return
 }
 
-func (m *MyTelnetClient) Close() error {
+func (m *MyTelnetClient) Close() (err error) {
 	if m.conn == nil {
-		return nil
+		return
 	}
-	return m.conn.Close()
+	if err = m.conn.Close(); err != nil {
+		return
+	}
+	fmt.Fprintln(os.Stderr, "...EOF")
+	return
 }
 
 func (m *MyTelnetClient) Send() error {
 	if m.conn == nil {
-		return ErrNotConnected
+		return errors.New("...Connection was closed by peer\n")
 	}
-	if _, err := io.Copy(m.conn, m.in); err != nil {
-		return err
-	}
-	return nil
+	_, err := io.Copy(m.conn, m.in)
+	return err
 }
 
 func (m *MyTelnetClient) Receive() error {
 	if m.conn == nil {
-		return ErrNotConnected
+		return errors.New("...Connection was closed by peer\n")
 	}
-	if _, err := io.Copy(m.out, m.conn); err != nil {
-		return err
-	}
-	return nil
+	_, err := io.Copy(m.out, m.conn)
+	return err
 }
