@@ -35,21 +35,20 @@ func main() {
 		os.Exit(1)
 	}
 
-	ctx, cancelFunc := signal.NotifyContext(context.Background(), os.Interrupt)
+	ctx, cancelFunc := signal.NotifyContext(context.Background(), os.Interrupt, os.Kill)
+	defer client.Close()
 
 	go func() {
+		defer cancelFunc()
 		if err := client.Send(); err != nil {
-			client.Close()
-			cancelFunc()
-			return
+			fmt.Fprint(os.Stderr, err)
 		}
 	}()
 
 	go func() {
+		defer cancelFunc()
 		if err := client.Receive(); err != nil {
-			client.Close()
-			cancelFunc()
-			return
+			fmt.Fprint(os.Stderr, err)
 		}
 	}()
 
