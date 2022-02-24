@@ -20,8 +20,8 @@ func TestTelnetClient(t *testing.T) {
 
 		client := NewTelnetClient("", timeout, ioutil.NopCloser(in), out)
 		require.Error(t, client.Connect())
-		require.Error(t, client.Send())
-		require.Error(t, client.Receive())
+		require.Error(t, client.Send(), ErrNotConnected)
+		require.Error(t, client.Receive(), ErrNotConnected)
 		require.NoError(t, client.Close())
 	})
 

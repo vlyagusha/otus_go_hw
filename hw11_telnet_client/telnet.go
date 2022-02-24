@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"net"
@@ -33,6 +34,8 @@ type MyTelnetClient struct {
 	conn    net.Conn
 }
 
+var ErrNotConnected = errors.New("not connected")
+
 func (m *MyTelnetClient) Connect() (err error) {
 	m.conn, err = net.DialTimeout("tcp", m.address, m.timeout)
 	if err != nil {
@@ -56,7 +59,7 @@ func (m *MyTelnetClient) Close() (err error) {
 func (m *MyTelnetClient) Send() error {
 	if m.conn == nil {
 		fmt.Fprintln(os.Stderr, "...Connection was closed by peer")
-		return nil
+		return ErrNotConnected
 	}
 	_, err := io.Copy(m.conn, m.in)
 	return err
@@ -65,7 +68,7 @@ func (m *MyTelnetClient) Send() error {
 func (m *MyTelnetClient) Receive() error {
 	if m.conn == nil {
 		fmt.Fprintln(os.Stderr, "...Connection was closed by peer")
-		return nil
+		return ErrNotConnected
 	}
 	_, err := io.Copy(m.out, m.conn)
 	return err
