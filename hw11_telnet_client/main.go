@@ -29,8 +29,8 @@ func main() {
 	}
 
 	address := net.JoinHostPort(host, port)
-	telnetClient := NewTelnetClient(address, timeout, os.Stdin, os.Stdout)
-	if err := telnetClient.Connect(); err != nil {
+	client := NewTelnetClient(address, timeout, os.Stdin, os.Stdout)
+	if err := client.Connect(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
@@ -38,16 +38,16 @@ func main() {
 	ctx, cancelFunc := signal.NotifyContext(context.Background(), os.Interrupt)
 
 	go func() {
-		if err := telnetClient.Send(); err != nil {
-			telnetClient.Close()
+		if err := client.Send(); err != nil {
+			client.Close()
 			cancelFunc()
 			return
 		}
 	}()
 
 	go func() {
-		if err := telnetClient.Receive(); err != nil {
-			telnetClient.Close()
+		if err := client.Receive(); err != nil {
+			client.Close()
 			cancelFunc()
 			return
 		}

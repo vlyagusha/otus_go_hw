@@ -14,6 +14,8 @@ type TelnetClient interface {
 	Receive() error
 }
 
+var ErrNotConnected = errors.New("not connected")
+
 func NewTelnetClient(address string, timeout time.Duration, in io.ReadCloser, out io.Writer) TelnetClient {
 	return &MyTelnetClient{
 		address: address,
@@ -50,7 +52,7 @@ func (m *MyTelnetClient) Close() error {
 
 func (m *MyTelnetClient) Send() error {
 	if m.conn == nil {
-		return errors.New("not connected")
+		return ErrNotConnected
 	}
 	if _, err := io.Copy(m.conn, m.in); err != nil {
 		return err
@@ -60,7 +62,7 @@ func (m *MyTelnetClient) Send() error {
 
 func (m *MyTelnetClient) Receive() error {
 	if m.conn == nil {
-		return errors.New("not connected")
+		return ErrNotConnected
 	}
 	if _, err := io.Copy(m.out, m.conn); err != nil {
 		return err
