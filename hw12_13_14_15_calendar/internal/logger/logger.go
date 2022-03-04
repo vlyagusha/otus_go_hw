@@ -1,20 +1,76 @@
 package logger
 
-import "fmt"
+import (
+	"fmt"
+	"io"
+	"net/http"
+	"os"
+	"time"
 
-type Logger struct { // TODO
+	"github.com/vlyagusha/otus_go_hw/hw12_13_14_15_calendar/internal/config"
+
+	"github.com/sirupsen/logrus"
+)
+
+type Logger struct {
+	logger *logrus.Logger
 }
 
-func New(level string) *Logger {
-	return &Logger{}
+func New(loggerConfig config.LoggerConf) (*Logger, error) {
+	logger := logrus.New()
+
+	loggerOutput, err := parseLogFile(loggerConfig.Filename)
+	if err != nil {
+		return nil, fmt.Errorf("invalid log file name: %w", err)
+	}
+	logger.SetOutput(loggerOutput)
+
+	loggerLevel, err := logrus.ParseLevel(string(loggerConfig.Level))
+	if err != nil {
+		return nil, err
+	}
+	logger.SetLevel(loggerLevel)
+
+	logger.SetFormatter(&logrus.JSONFormatter{})
+
+	return &Logger{
+		logger,
+	}, nil
 }
 
-func (l Logger) Info(msg string) {
-	fmt.Println(msg)
+func (l *Logger) Info(format string, params ...interface{}) {
+	l.logger.Infof(format, params...)
 }
 
-func (l Logger) Error(msg string) {
-	// TODO
+func (l *Logger) Error(format string, params ...interface{}) {
+	l.logger.Errorf(format, params...)
 }
 
-// TODO
+func (l *Logger) LogHTTPRequest(r *http.Request, code, length int) {
+	l.logger.Infof(
+		"%s [%s] %s %s %s %d %d %q",
+		r.RemoteAddr,
+		time.Now().Format("02/Jan/2006:15:04:05 MST"),
+		r.Method,
+		r.RequestURI,
+		r.Proto,
+		code,
+		length,
+		r.UserAgent(),
+	)
+}
+
+func parseLogFile(filename string) (io.Writer, error) {
+	switch filename {
+	case "stderr":
+		return os.Stderr, nil
+	case "stdout":
+		return os.Stdout, nil
+	default:
+		file, err := os.OpenFile(filename, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0o666)
+		if err != nil {
+			return nil, err
+		}
+		return file, nil
+	}
+}
