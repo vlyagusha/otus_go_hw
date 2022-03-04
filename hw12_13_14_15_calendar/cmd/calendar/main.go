@@ -36,6 +36,10 @@ func main() {
 	}
 
 	logg, err := internallogger.New(config.Logger)
+	if err != nil {
+		logg.Error("failed to create logger: " + err.Error())
+		os.Exit(1)
+	}
 
 	storage := memorystorage.New()
 	calendar := app.New(logg, storage)

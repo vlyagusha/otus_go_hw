@@ -10,14 +10,14 @@ import (
 type Config struct {
 	Logger  LoggerConf
 	Storage StorageConf
-	HTTP    HttpConf
+	HTTP    HTTPConf
 }
 
 type Level string
 
 const (
 	Info  Level = "info"
-	Error       = "error"
+	Error Level = "error"
 )
 
 type LoggerConf struct {
@@ -29,7 +29,7 @@ type StorageType string
 
 const (
 	SQL      StorageType = "sql"
-	InMemory             = "in-memory"
+	InMemory StorageType = "in-memory"
 )
 
 type StorageConf struct {
@@ -37,7 +37,7 @@ type StorageConf struct {
 	Dsn  string
 }
 
-type HttpConf struct {
+type HTTPConf struct {
 	Host string
 	Port string
 }

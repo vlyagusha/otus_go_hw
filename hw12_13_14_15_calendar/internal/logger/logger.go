@@ -37,12 +37,12 @@ func New(loggerConfig config.LoggerConf) (*Logger, error) {
 	}, nil
 }
 
-func (l *Logger) Info(format string, params ...interface{}) {
-	l.logger.Infof(format, params...)
+func (l *Logger) Info(message string, params ...interface{}) {
+	l.logger.Infof(message, params...)
 }
 
-func (l *Logger) Error(format string, params ...interface{}) {
-	l.logger.Errorf(format, params...)
+func (l *Logger) Error(message string, params ...interface{}) {
+	l.logger.Errorf(message, params...)
 }
 
 func (l *Logger) LogHTTPRequest(r *http.Request, code, length int) {

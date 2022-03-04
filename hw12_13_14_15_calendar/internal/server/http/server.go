@@ -14,8 +14,8 @@ type Server struct {
 }
 
 type Logger interface {
-	Info(format string, params ...interface{})
-	Error(format string, params ...interface{})
+	Info(message string, params ...interface{})
+	Error(message string, params ...interface{})
 	LogHTTPRequest(r *http.Request, code, length int)
 }
 
