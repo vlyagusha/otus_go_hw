@@ -1,4 +1,4 @@
-package memorystorage
+package sqlstorage
 
 import (
 	"testing"

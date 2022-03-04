@@ -1,4 +1,4 @@
-package memorystorage
+package internalhttp
 
 import (
 	"testing"
@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestStorage(t *testing.T) {
+func TestMiddleware(t *testing.T) {
 	t.Run("basic", func(t *testing.T) {
 		require.True(t, true)
 	})
