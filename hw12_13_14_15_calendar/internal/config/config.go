@@ -10,7 +10,7 @@ import (
 type Config struct {
 	Logger  LoggerConf
 	Storage StorageConf
-	Http    HttpConf
+	HTTP    HttpConf
 }
 
 type Level string
@@ -28,7 +28,7 @@ type LoggerConf struct {
 type StorageType string
 
 const (
-	Sql      StorageType = "sql"
+	SQL      StorageType = "sql"
 	InMemory             = "in-memory"
 )
 

@@ -18,7 +18,7 @@ type Event struct {
 	StartedAt   time.Time
 	FinishedAt  time.Duration
 	Description string
-	UserId      uuid.UUID
+	UserID      uuid.UUID
 	Notify      time.Duration
 }
 
@@ -27,7 +27,7 @@ func NewEvent(
 	startedAt time.Time,
 	finishedAt time.Duration,
 	description string,
-	userId uuid.UUID,
+	userID uuid.UUID,
 	notify time.Duration) *Event {
 	return &Event{
 		ID:          uuid.New(),
@@ -35,7 +35,7 @@ func NewEvent(
 		StartedAt:   startedAt,
 		FinishedAt:  finishedAt,
 		Description: description,
-		UserId:      userId,
+		UserID:      userID,
 		Notify:      notify,
 	}
 }

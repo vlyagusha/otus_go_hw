@@ -7,9 +7,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/vlyagusha/otus_go_hw/hw12_13_14_15_calendar/internal/config"
-
 	"github.com/sirupsen/logrus"
+	"github.com/vlyagusha/otus_go_hw/hw12_13_14_15_calendar/internal/config"
 )
 
 type Logger struct {

@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-
 	"github.com/vlyagusha/otus_go_hw/hw12_13_14_15_calendar/internal/storage"
 )
 

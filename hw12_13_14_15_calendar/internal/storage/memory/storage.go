@@ -3,9 +3,8 @@ package memorystorage
 import (
 	"sync"
 
-	"github.com/vlyagusha/otus_go_hw/hw12_13_14_15_calendar/internal/storage"
-
 	"github.com/google/uuid"
+	"github.com/vlyagusha/otus_go_hw/hw12_13_14_15_calendar/internal/storage"
 )
 
 type Storage struct {
@@ -17,11 +16,11 @@ func (s *Storage) Create(e storage.Event) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	if _, ok := s.events[e.UserId]; ok {
+	if _, ok := s.events[e.UserID]; ok {
 		return storage.ErrEventAlreadyExists
 	}
 
-	s.events[e.UserId] = e
+	s.events[e.UserID] = e
 	return nil
 }
 
@@ -29,7 +28,7 @@ func (s *Storage) Update(e storage.Event) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	s.events[e.UserId] = e
+	s.events[e.UserID] = e
 	return nil
 }
 
