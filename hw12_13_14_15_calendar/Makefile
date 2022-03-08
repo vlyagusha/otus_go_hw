@@ -3,7 +3,7 @@ DOCKER_IMG="calendar:develop"
 
 GIT_HASH := $(shell git log --format="%h" -n 1)
 LDFLAGS := -X main.release="develop" -X main.buildDate=$(shell date -u +%Y-%m-%dT%H:%M:%S) -X main.gitHash=$(GIT_HASH)
-DATABASE_DSN := "postgresql://calendar:calendar@localhost:54321/calendar"
+DATABASE_DSN := "postgresql://postgres:postgres@localhost:54321/calendar?sslmode=disable"
 
 build:
 	go build -v -o $(BIN) -ldflags "$(LDFLAGS)" ./cmd/calendar

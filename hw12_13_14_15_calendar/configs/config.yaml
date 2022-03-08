@@ -3,7 +3,7 @@ logger:
   filename: "stderr"
 storage:
   #  type: "sql"
-  #  dsn: "postgres://postgres:postgres@localhost:54321/calendar"
+  #  dsn: "postgresql://postgres:postgres@localhost:54321/calendar?sslmode=disable"
   type: "in-memory"
 http:
   host: "127.0.0.1"

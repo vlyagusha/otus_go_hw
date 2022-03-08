@@ -14,6 +14,7 @@ import (
 	internallogger "github.com/vlyagusha/otus_go_hw/hw12_13_14_15_calendar/internal/logger"
 	internalhttp "github.com/vlyagusha/otus_go_hw/hw12_13_14_15_calendar/internal/server/http"
 	memorystorage "github.com/vlyagusha/otus_go_hw/hw12_13_14_15_calendar/internal/storage/memory"
+	sqlstorage "github.com/vlyagusha/otus_go_hw/hw12_13_14_15_calendar/internal/storage/sql"
 )
 
 var configFile string
@@ -41,14 +42,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	storage := memorystorage.New()
-	calendar := app.New(logg, storage)
-
-	server := internalhttp.NewServer(logg, calendar, config.HTTP.Host, config.HTTP.Port)
-
 	ctx, cancel := signal.NotifyContext(context.Background(),
 		syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
 	defer cancel()
+
+	storage := createStorage(ctx, *config)
+	calendar := app.New(logg, storage)
+	server := internalhttp.NewServer(logg, calendar, config.HTTP.Host, config.HTTP.Port)
 
 	go func() {
 		<-ctx.Done()
@@ -68,4 +68,17 @@ func main() {
 		cancel()
 		os.Exit(1) //nolint:gocritic
 	}
+}
+
+func createStorage(ctx context.Context, config internalconfig.Config) app.Storage {
+	var storage app.Storage
+	switch config.Storage.Type {
+	case internalconfig.InMemory:
+		storage = memorystorage.New()
+	case internalconfig.SQL:
+		storage = sqlstorage.New(ctx, config.Storage.Dsn)
+	default:
+		log.Fatalf("Unknown storage type: %s\n", config.Storage.Type)
+	}
+	return storage
 }
