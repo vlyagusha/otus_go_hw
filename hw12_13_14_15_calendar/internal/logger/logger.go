@@ -37,8 +37,16 @@ func New(loggerConfig config.LoggerConf) (*Logger, error) {
 	}, nil
 }
 
+func (l *Logger) Debug(message string, params ...interface{}) {
+	l.logger.Debugf(message, params...)
+}
+
 func (l *Logger) Info(message string, params ...interface{}) {
 	l.logger.Infof(message, params...)
+}
+
+func (l *Logger) Warn(message string, params ...interface{}) {
+	l.logger.Warnf(message, params...)
 }
 
 func (l *Logger) Error(message string, params ...interface{}) {

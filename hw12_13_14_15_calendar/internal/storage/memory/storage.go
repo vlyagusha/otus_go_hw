@@ -16,11 +16,11 @@ func (s *Storage) Create(e storage.Event) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	if _, ok := s.events[e.UserID]; ok {
+	if _, ok := s.events[e.ID]; ok {
 		return storage.ErrEventAlreadyExists
 	}
 
-	s.events[e.UserID] = e
+	s.events[e.ID] = e
 	return nil
 }
 
@@ -28,7 +28,7 @@ func (s *Storage) Update(e storage.Event) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	s.events[e.UserID] = e
+	s.events[e.ID] = e
 	return nil
 }
 

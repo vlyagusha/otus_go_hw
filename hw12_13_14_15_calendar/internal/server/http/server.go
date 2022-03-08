@@ -14,7 +14,9 @@ type Server struct {
 }
 
 type Logger interface {
+	Debug(message string, params ...interface{})
 	Info(message string, params ...interface{})
+	Warn(message string, params ...interface{})
 	Error(message string, params ...interface{})
 	LogHTTPRequest(r *http.Request, code, length int)
 }

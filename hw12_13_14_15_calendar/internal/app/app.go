@@ -13,7 +13,9 @@ type App struct {
 }
 
 type Logger interface {
+	Debug(format string, params ...interface{})
 	Info(format string, params ...interface{})
+	Warn(format string, params ...interface{})
 	Error(format string, params ...interface{})
 }
 
