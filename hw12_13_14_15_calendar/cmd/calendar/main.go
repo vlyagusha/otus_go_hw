@@ -76,7 +76,7 @@ func createStorage(ctx context.Context, config internalconfig.Config) app.Storag
 	case internalconfig.InMemory:
 		storage = memorystorage.New()
 	case internalconfig.SQL:
-		storage = sqlstorage.New(ctx, config.Storage.Dsn)
+		storage = sqlstorage.New(ctx, config.Storage.Dsn).Connect(ctx)
 	default:
 		log.Fatalf("Unknown storage type: %s\n", config.Storage.Type)
 	}
