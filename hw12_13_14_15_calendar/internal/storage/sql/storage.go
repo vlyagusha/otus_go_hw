@@ -8,6 +8,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4"
+	"github.com/vlyagusha/otus_go_hw/hw12_13_14_15_calendar/internal/app"
 	"github.com/vlyagusha/otus_go_hw/hw12_13_14_15_calendar/internal/storage"
 )
 
@@ -24,14 +25,14 @@ func New(ctx context.Context, dsn string) *Storage {
 	}
 }
 
-func (s *Storage) Connect(ctx context.Context) error {
+func (s *Storage) Connect(ctx context.Context) app.Storage {
 	conn, err := pgx.Connect(ctx, s.dsn)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to connect database: %v\n", err)
 		os.Exit(1)
 	}
 	s.conn = conn
-	return nil
+	return s
 }
 
 func (s *Storage) Close(ctx context.Context) error {
