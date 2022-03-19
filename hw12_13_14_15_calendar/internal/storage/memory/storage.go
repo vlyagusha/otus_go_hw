@@ -1,6 +1,7 @@
 package memorystorage
 
 import (
+	"sort"
 	"sync"
 
 	"github.com/google/uuid"
@@ -45,11 +46,30 @@ func (s *Storage) Delete(id uuid.UUID) error {
 }
 
 func (s *Storage) FindAll() ([]storage.Event, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	events := make([]storage.Event, 0, len(s.events))
 	for _, event := range s.events {
 		events = append(events, event)
 	}
+
+	sort.Slice(events, func(i, j int) bool {
+		return events[i].StartedAt.Unix() < events[j].StartedAt.Unix()
+	})
+
 	return events, nil
+}
+
+func (s *Storage) Find(id uuid.UUID) (*storage.Event, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if event, ok := s.events[id]; ok {
+		return &event, nil
+	}
+
+	return nil, nil
 }
 
 func New() *Storage {

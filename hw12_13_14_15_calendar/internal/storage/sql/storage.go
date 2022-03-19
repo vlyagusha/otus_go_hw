@@ -2,6 +2,7 @@ package sqlstorage
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"time"
@@ -99,6 +100,34 @@ func (s *Storage) Delete(id uuid.UUID) error {
 	_, err := s.conn.Exec(s.ctx, sql, id)
 
 	return err
+}
+
+func (s *Storage) Find(id uuid.UUID) (*storage.Event, error) {
+	var e storage.Event
+
+	sql := `
+select id, title, started_at, finished_at, description, user_id, notify 
+from events
+where id = $1
+`
+	err := s.conn.QueryRow(s.ctx, sql, id).Scan(
+		&e.ID,
+		&e.Title,
+		&e.StartedAt,
+		&e.FinishedAt,
+		&e.Description,
+		&e.UserID,
+		&e.Notify,
+	)
+
+	if err == nil {
+		return &e, nil
+	}
+	if errors.Is(err, pgx.ErrNoRows) {
+		return nil, nil
+	}
+
+	return nil, fmt.Errorf("failed to scan SQL result into struct: %w", err)
 }
 
 func (s *Storage) FindAll() ([]storage.Event, error) {
