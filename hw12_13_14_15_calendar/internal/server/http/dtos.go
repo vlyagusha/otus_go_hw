@@ -14,7 +14,7 @@ type EventDto struct {
 	StartedAt   string `json:"startedAt"`
 	FinishedAt  string `json:"finishedAt"`
 	Description string `json:"description"`
-	UserID      string `json:"userID"`
+	UserID      string `json:"userId"`
 	Notify      string `json:"notify"`
 }
 
