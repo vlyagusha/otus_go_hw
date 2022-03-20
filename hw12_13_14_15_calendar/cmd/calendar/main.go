@@ -9,11 +9,10 @@ import (
 	"syscall"
 	"time"
 
-	internalgrpc "github.com/vlyagusha/otus_go_hw/hw12_13_14_15_calendar/internal/server/grpc"
-
 	"github.com/vlyagusha/otus_go_hw/hw12_13_14_15_calendar/internal/app"
 	internalconfig "github.com/vlyagusha/otus_go_hw/hw12_13_14_15_calendar/internal/config"
 	internallogger "github.com/vlyagusha/otus_go_hw/hw12_13_14_15_calendar/internal/logger"
+	internalgrpc "github.com/vlyagusha/otus_go_hw/hw12_13_14_15_calendar/internal/server/grpc"
 	internalhttp "github.com/vlyagusha/otus_go_hw/hw12_13_14_15_calendar/internal/server/http"
 	memorystorage "github.com/vlyagusha/otus_go_hw/hw12_13_14_15_calendar/internal/storage/memory"
 	sqlstorage "github.com/vlyagusha/otus_go_hw/hw12_13_14_15_calendar/internal/storage/sql"

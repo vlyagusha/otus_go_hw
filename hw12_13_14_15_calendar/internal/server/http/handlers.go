@@ -7,11 +7,10 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/vlyagusha/otus_go_hw/hw12_13_14_15_calendar/internal/storage"
-
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/vlyagusha/otus_go_hw/hw12_13_14_15_calendar/internal/app"
+	"github.com/vlyagusha/otus_go_hw/hw12_13_14_15_calendar/internal/storage"
 )
 
 type ServerHandlers struct {
