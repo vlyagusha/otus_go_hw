@@ -13,9 +13,12 @@ import (
 )
 
 func main() {
+	const defaultTimeout = 10 * time.Second
+
 	var host, port string
 	var timeout time.Duration
-	pflag.DurationVarP(&timeout, "timeout", "t", 10*time.Second, "")
+
+	pflag.DurationVarP(&timeout, "timeout", "t", defaultTimeout, "")
 	pflag.Parse()
 
 	if host = pflag.Arg(0); host == "" {

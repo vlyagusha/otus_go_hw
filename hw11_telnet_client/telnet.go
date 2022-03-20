@@ -42,7 +42,7 @@ func (m *MyTelnetClient) Connect() (err error) {
 		return err
 	}
 	fmt.Fprintln(os.Stderr, "...Connected to "+m.address)
-	return
+	return nil
 }
 
 func (m *MyTelnetClient) Close() (err error) {
@@ -53,7 +53,7 @@ func (m *MyTelnetClient) Close() (err error) {
 		return
 	}
 	fmt.Fprintln(os.Stderr, "...EOF")
-	return
+	return nil
 }
 
 func (m *MyTelnetClient) Send() error {
