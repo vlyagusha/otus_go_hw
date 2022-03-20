@@ -1,18 +1,55 @@
-package memorystorage
+package sqlstorage
 
 import (
+	"context"
+	"errors"
+	"os"
 	"testing"
 	"time"
 
 	"github.com/google/uuid"
+
+	"github.com/jackc/pgx/v4"
 	"github.com/stretchr/testify/require"
-	memorystorage "github.com/vlyagusha/otus_go_hw/hw12_13_14_15_calendar/internal/storage"
+	sqlstorage "github.com/vlyagusha/otus_go_hw/hw12_13_14_15_calendar/internal/storage"
+	"gopkg.in/yaml.v3"
 )
 
-func TestStorage(t *testing.T) {
-	storage := New()
+const DefaultConfigFile = "configs/config.yaml"
 
-	t.Run("common test", func(t *testing.T) {
+func TestStorage(t *testing.T) {
+	if _, err := os.Stat(DefaultConfigFile); errors.Is(err, os.ErrNotExist) {
+		t.Skip(DefaultConfigFile + " file does not exists")
+	}
+
+	configContent, _ := os.ReadFile(DefaultConfigFile)
+	var config struct {
+		Storage struct {
+			Dsn string
+		}
+	}
+
+	err := yaml.Unmarshal(configContent, config)
+	if err != nil {
+		t.Fatal("Failed to unmarshal config", err)
+	}
+
+	ctx := context.Background()
+	storage := New(ctx, config.Storage.Dsn)
+	if err := storage.Connect(ctx); err != nil {
+		t.Fatal("Failed to connect to DB server", err)
+	}
+
+	t.Run("test SQLStorage CRUDL", func(t *testing.T) {
+		tx, err := storage.conn.BeginTx(ctx, pgx.TxOptions{
+			IsoLevel:       pgx.Serializable,
+			AccessMode:     pgx.ReadWrite,
+			DeferrableMode: pgx.NotDeferrable,
+		})
+		if err != nil {
+			t.Fatal("Failed to connect to DB server", err)
+		}
+
 		userID := uuid.New()
 		startedAt, err := time.Parse("2006-01-02 15:04:05", "2022-03-08 12:00:00")
 		if err != nil {
@@ -30,7 +67,7 @@ func TestStorage(t *testing.T) {
 			return
 		}
 
-		event := memorystorage.NewEvent(
+		event := sqlstorage.NewEvent(
 			"Event title",
 			startedAt,
 			finishedAt,
@@ -79,8 +116,6 @@ func TestStorage(t *testing.T) {
 		}
 		require.Len(t, saved, 1)
 		require.Equal(t, *event, saved[0])
-		require.Equal(t, event.Title, saved[0].Title)
-		require.Equal(t, event.Description, saved[0].Description)
 
 		err = storage.Delete(event.ID)
 		if err != nil {
@@ -94,5 +129,10 @@ func TestStorage(t *testing.T) {
 			return
 		}
 		require.Len(t, saved, 0)
+
+		err = tx.Rollback(ctx)
+		if err != nil {
+			t.Fatal("Failed to rollback tx", err)
+		}
 	})
 }
