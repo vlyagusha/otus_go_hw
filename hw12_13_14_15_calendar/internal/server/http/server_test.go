@@ -9,34 +9,33 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/vlyagusha/otus_go_hw/hw12_13_14_15_calendar/internal/app"
+	"github.com/vlyagusha/otus_go_hw/hw12_13_14_15_calendar/internal/config"
 	"github.com/vlyagusha/otus_go_hw/hw12_13_14_15_calendar/internal/logger"
 	memorystorage "github.com/vlyagusha/otus_go_hw/hw12_13_14_15_calendar/internal/storage/memory"
 )
 
 func TestHttpServerHelloWorld(t *testing.T) {
-	// Test Hello World
 	req := httptest.NewRequest("GET", "/", nil)
 	w := httptest.NewRecorder()
 
-	// Проверю тут сам роутинг + обработчики
 	httpHandlers := NewRouter(createApp(t))
 	httpHandlers.ServeHTTP(w, req)
 
 	resp := w.Result()
-	body, _ := io.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
+	require.Nil(t, err)
 	require.Equal(t, "Hello, world!\n", string(body))
 }
 
 func TestHttpServerEventsCrud(t *testing.T) {
-	// Test Hello World
 	body := bytes.NewBufferString(`{
 		"id": "4927aa58-a175-429a-a125-c04765597152",
-		"title": "Test Event 01",
-		"description": "Test Event Description 01",
-		"date": "2021-12-20 12:30:00",
-		"duration": 60,
-		"user_id": "b6a4fbfa-a9b2-429c-b0c5-20915c84e9ee",
-		"notify_before_seconds": 60
+		"title": "Event Title 1",
+		"startedAt": "2022-03-20 12:30:00",
+		"finishedAt": "2022-03-21 12:30:00",
+		"description": "Event Description 1",
+		"notify": "2022-03-19 12:30:00",
+		"userId": "b6a4fbfa-a9b2-429c-b0c5-20915c84e9ee",
 	}`)
 	req := httptest.NewRequest("POST", "/events", body)
 	w := httptest.NewRecorder()
@@ -49,15 +48,14 @@ func TestHttpServerEventsCrud(t *testing.T) {
 	respExpected := `{"id":"4927aa58-a175-429a-a125-c04765597152","title":"Test Event 01","date":"2021-12-20 12:30:00","duration":60,"description":"Test Event Description 01","user_id":"b6a4fbfa-a9b2-429c-b0c5-20915c84e9ee","notify_before_seconds":60}` // nolint:lll
 	require.Equal(t, respExpected, string(respBody))
 
-	// Обновим:
-	// Test Hello World
 	body = bytes.NewBufferString(`{
-		"title": "Test Event 01 UPD",
-		"description": "Test Event Description 01 UPD",
-		"date": "2021-12-21 12:30:00",
-		"duration": 120,
-		"user_id": "b6a4fbfa-a9b2-429c-b0c5-20915c84e9ee",
-		"notify_before_seconds": 120
+		"id": "4927aa58-a175-429a-a125-c04765597152",
+		"title": "Event Title 2",
+		"startedAt": "2022-03-20 12:30:00",
+		"finishedAt": "2022-03-21 12:30:00",
+		"description": "Event Description 2",
+		"notify": "2022-03-19 12:30:00",
+		"userId": "b6a4fbfa-a9b2-429c-b0c5-20915c84e9ee",
 	}`)
 	req = httptest.NewRequest("PUT", "/events/4927aa58-a175-429a-a125-c04765597152", body)
 	w = httptest.NewRecorder()
@@ -66,10 +64,16 @@ func TestHttpServerEventsCrud(t *testing.T) {
 
 	resp = w.Result()
 	respBody, _ = io.ReadAll(resp.Body)
-	respExpected = `{"id":"4927aa58-a175-429a-a125-c04765597152","title":"Test Event 01 UPD","date":"2021-12-21 12:30:00","duration":120,"description":"Test Event Description 01 UPD","user_id":"b6a4fbfa-a9b2-429c-b0c5-20915c84e9ee","notify_before_seconds":120}` // nolint:lll
+	respExpected = `{
+		"id": "4927aa58-a175-429a-a125-c04765597152",
+		"title": "Event Title 2",
+		"startedAt": "2022-03-20 12:30:00",
+		"finishedAt": "2022-03-21 12:30:00",
+		"description": "Event Description 2",
+		"notify": "2022-03-19 12:30:00",
+		"userId": "b6a4fbfa-a9b2-429c-b0c5-20915c84e9ee",
+	}`
 	require.Equal(t, respExpected, string(respBody))
-
-	// Всё дальше писать не могу :( ...
 }
 
 func createApp(t *testing.T) *app.App {
@@ -79,12 +83,15 @@ func createApp(t *testing.T) *app.App {
 		t.Errorf("failed to open test log file: %s", err)
 	}
 
-	logger, err := logger.New(logFile.Name(), "debug", "text_simple")
+	logg, err := logger.New(config.LoggerConf{
+		Level:    config.Debug,
+		Filename: logFile.Name(),
+	})
 	if err != nil {
 		t.Errorf("failed to open test log file: %s", err)
 	}
 
 	inMemoryStorage := memorystorage.New()
 
-	return app.New(logger, inMemoryStorage)
+	return app.New(logg, inMemoryStorage)
 }
