@@ -35,7 +35,7 @@ func TestHttpServerEventsCrud(t *testing.T) {
 		"finishedAt": "2022-03-21 12:30:00",
 		"description": "Event Description 1",
 		"notify": "2022-03-19 12:30:00",
-		"userId": "b6a4fbfa-a9b2-429c-b0c5-20915c84e9ee",
+		"userId": "b6a4fbfa-a9b2-429c-b0c5-20915c84e9ee"
 	}`)
 	req := httptest.NewRequest("POST", "/events", body)
 	w := httptest.NewRecorder()
@@ -45,7 +45,7 @@ func TestHttpServerEventsCrud(t *testing.T) {
 
 	resp := w.Result()
 	respBody, _ := io.ReadAll(resp.Body)
-	respExpected := `{"id":"4927aa58-a175-429a-a125-c04765597152","title":"Test Event 01","date":"2021-12-20 12:30:00","duration":60,"description":"Test Event Description 01","user_id":"b6a4fbfa-a9b2-429c-b0c5-20915c84e9ee","notify_before_seconds":60}` // nolint:lll
+	respExpected := `{"id":"4927aa58-a175-429a-a125-c04765597152","title":"Event Title 1","startedAt":"2022-03-20 12:30:00","finishedAt":"2022-03-21 12:30:00","description":"Event Description 1","userId":"b6a4fbfa-a9b2-429c-b0c5-20915c84e9ee","notify":"2022-03-19 12:30:00"}` // nolint:lll
 	require.Equal(t, respExpected, string(respBody))
 
 	body = bytes.NewBufferString(`{
@@ -55,7 +55,7 @@ func TestHttpServerEventsCrud(t *testing.T) {
 		"finishedAt": "2022-03-21 12:30:00",
 		"description": "Event Description 2",
 		"notify": "2022-03-19 12:30:00",
-		"userId": "b6a4fbfa-a9b2-429c-b0c5-20915c84e9ee",
+		"userId": "b6a4fbfa-a9b2-429c-b0c5-20915c84e9ee"
 	}`)
 	req = httptest.NewRequest("PUT", "/events/4927aa58-a175-429a-a125-c04765597152", body)
 	w = httptest.NewRecorder()
@@ -64,15 +64,7 @@ func TestHttpServerEventsCrud(t *testing.T) {
 
 	resp = w.Result()
 	respBody, _ = io.ReadAll(resp.Body)
-	respExpected = `{
-		"id": "4927aa58-a175-429a-a125-c04765597152",
-		"title": "Event Title 2",
-		"startedAt": "2022-03-20 12:30:00",
-		"finishedAt": "2022-03-21 12:30:00",
-		"description": "Event Description 2",
-		"notify": "2022-03-19 12:30:00",
-		"userId": "b6a4fbfa-a9b2-429c-b0c5-20915c84e9ee",
-	}`
+	respExpected = `{"id":"4927aa58-a175-429a-a125-c04765597152","title":"Event Title 2","startedAt":"2022-03-20 12:30:00","finishedAt":"2022-03-21 12:30:00","description":"Event Description 2","userId":"b6a4fbfa-a9b2-429c-b0c5-20915c84e9ee","notify":"2022-03-19 12:30:00"}` // nolint:lll
 	require.Equal(t, respExpected, string(respBody))
 }
 
