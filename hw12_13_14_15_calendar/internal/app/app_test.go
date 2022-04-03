@@ -85,18 +85,18 @@ func TestAppEventCrud(t *testing.T) {
 
 	startedAt := parseDate(t, "2022-03-20T12:30:00Z")
 
-	events, err := testApp.GetEventsStartedIn(ctx, startedAt, startedAt.AddDate(0, 0, 1).Sub(startedAt))
+	events, err := testApp.GetEventsDay(ctx, startedAt)
 	require.Nil(t, err)
 	require.Len(t, events, 1)
 	require.Equal(t, "4927aa58-a175-429a-a125-c04765597152", events[0].ID.String())
 
-	events, err = testApp.GetEventsStartedIn(ctx, startedAt, startedAt.AddDate(0, 0, 8).Sub(startedAt))
+	events, err = testApp.GetEventsWeek(ctx, startedAt)
 	require.Nil(t, err)
 	require.Len(t, events, 2)
 	require.Equal(t, "4927aa58-a175-429a-a125-c04765597152", events[0].ID.String())
 	require.Equal(t, "4927aa58-a175-429a-a125-c04765597153", events[1].ID.String())
 
-	events, err = testApp.GetEventsStartedIn(ctx, startedAt, startedAt.AddDate(0, 1, 1).Sub(startedAt))
+	events, err = testApp.GetEventsMonth(ctx, startedAt)
 	require.Nil(t, err)
 	require.Len(t, events, 3)
 	require.Equal(t, "4927aa58-a175-429a-a125-c04765597152", events[0].ID.String())

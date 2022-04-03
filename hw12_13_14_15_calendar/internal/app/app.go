@@ -115,10 +115,22 @@ func (a *App) GetEvents(ctx context.Context) ([]storage.Event, error) {
 	return a.Storage.FindAll()
 }
 
+func (a *App) GetEventsDay(ctx context.Context, day time.Time) ([]storage.Event, error) {
+	return a.Storage.FindOnDay(day)
+}
+
+func (a *App) GetEventsWeek(ctx context.Context, dayStart time.Time) ([]storage.Event, error) {
+	return a.Storage.FindOnWeek(dayStart)
+}
+
+func (a *App) GetEventsMonth(ctx context.Context, dayStart time.Time) ([]storage.Event, error) {
+	return a.Storage.FindOnMonth(dayStart)
+}
+
 func (a *App) GetEventsStartedIn(ctx context.Context, day time.Time, interval time.Duration) ([]storage.Event, error) {
 	a.Logger.Debug("App.GetEventsStartedIn: day: %s, interval: %s", day, interval)
 
-	events := make([]storage.Event, 0)
+	var events []storage.Event
 	day = day.Truncate(time.Minute * 1440)
 
 	// todo: make special Storage function
