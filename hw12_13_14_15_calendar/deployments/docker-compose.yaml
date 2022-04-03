@@ -16,6 +16,11 @@ services:
       localnet:
         aliases:
           - ${APP_HOST}
+  rabbit:
+    image: rabbitmq:3.9.14-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
 
 networks:
   localnet:

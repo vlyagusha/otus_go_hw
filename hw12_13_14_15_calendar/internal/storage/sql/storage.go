@@ -278,3 +278,59 @@ order by date
 `
 	return s.conn.Query(s.ctx, searchSQL, from, to)
 }
+
+func (s *Storage) GetEventsReadyToNotify(dt time.Time) ([]storage.Event, error) {
+	sql := `
+select id, title, started_at, finished_at, description, user_id, notify 
+from events 
+where notify <= $1
+`
+	rows, err := s.conn.Query(s.ctx, sql, dt.Format(time.RFC3339))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	return createEventsFromRows(rows)
+}
+
+func (s *Storage) GetEventsOlderThan(dt time.Time) ([]storage.Event, error) {
+	sql := `
+select id, title, started_at, finished_at, description, user_id, notify 
+from events 
+where started_at <= $1
+`
+	rows, err := s.conn.Query(s.ctx, sql, dt.Format(time.RFC3339))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	return createEventsFromRows(rows)
+}
+
+func createEventsFromRows(rows pgx.Rows) ([]storage.Event, error) {
+	var events []storage.Event
+
+	for rows.Next() {
+		var e storage.Event
+		if err := rows.Scan(
+			&e.ID,
+			&e.Title,
+			&e.StartedAt,
+			&e.FinishedAt,
+			&e.Description,
+			&e.UserID,
+			&e.Notify,
+		); err != nil {
+			return nil, fmt.Errorf("failed to scan SQL result into struct: %w", err)
+		}
+
+		events = append(events, e)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return events, nil
+}

@@ -14,7 +14,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-const DefaultConfigFile = "configs/config.yaml"
+const DefaultConfigFile = "configs/calendar_config.yaml"
 
 func TestStorage(t *testing.T) {
 	if _, err := os.Stat(DefaultConfigFile); errors.Is(err, os.ErrNotExist) {

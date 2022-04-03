@@ -14,6 +14,18 @@ type Config struct {
 	GRPC    GRPCConf
 }
 
+type SchedulerConfig struct {
+	Logger  LoggerConf
+	Storage StorageConf
+	Rabbit  RabbitConf
+}
+
+type SenderConfig struct {
+	Logger  LoggerConf
+	Storage StorageConf
+	Rabbit  RabbitConf
+}
+
 type Level string
 
 const (
@@ -50,8 +62,22 @@ type GRPCConf struct {
 	Port string
 }
 
+type RabbitConf struct {
+	Dsn      string
+	Exchange string
+	Queue    string
+}
+
 func NewConfig() Config {
 	return Config{}
+}
+
+func NewSchedulerConfig() SchedulerConfig {
+	return SchedulerConfig{}
+}
+
+func NewSenderConfig() SenderConfig {
+	return SenderConfig{}
 }
 
 func LoadConfig(path string) (*Config, error) {
@@ -61,6 +87,36 @@ func LoadConfig(path string) (*Config, error) {
 	}
 
 	config := NewConfig()
+	err = yaml.Unmarshal(configContent, &config)
+	if err != nil {
+		return nil, fmt.Errorf("invalid config file content %s: %w", path, err)
+	}
+
+	return &config, nil
+}
+
+func LoadSchedulerConfig(path string) (*SchedulerConfig, error) {
+	configContent, err := os.ReadFile(path)
+	if err != nil {
+		return nil, fmt.Errorf("invalid config file %s: %w", path, err)
+	}
+
+	config := NewSchedulerConfig()
+	err = yaml.Unmarshal(configContent, &config)
+	if err != nil {
+		return nil, fmt.Errorf("invalid config file content %s: %w", path, err)
+	}
+
+	return &config, nil
+}
+
+func LoadSenderConfig(path string) (*SenderConfig, error) {
+	configContent, err := os.ReadFile(path)
+	if err != nil {
+		return nil, fmt.Errorf("invalid config file %s: %w", path, err)
+	}
+
+	config := NewSenderConfig()
 	err = yaml.Unmarshal(configContent, &config)
 	if err != nil {
 		return nil, fmt.Errorf("invalid config file content %s: %w", path, err)
