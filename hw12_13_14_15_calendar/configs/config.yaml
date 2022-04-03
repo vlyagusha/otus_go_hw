@@ -1,0 +1,10 @@
+logger:
+  level: "info"
+  filename: "stderr"
+storage:
+  #  type: "sql"
+  #  dsn: "postgresql://postgres:postgres@localhost:54321/calendar?sslmode=disable"
+  type: "in-memory"
+http:
+  host: "127.0.0.1"
+  port: "8081"
