@@ -11,4 +11,4 @@ create table if not exists events
 );
 
 -- +goose Down
-drop table events;
+drop table if exists events;

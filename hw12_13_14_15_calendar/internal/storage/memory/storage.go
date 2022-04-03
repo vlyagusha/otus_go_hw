@@ -45,6 +45,9 @@ func (s *Storage) Delete(id uuid.UUID) error {
 }
 
 func (s *Storage) FindAll() ([]storage.Event, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
 	events := make([]storage.Event, 0, len(s.events))
 	for _, event := range s.events {
 		events = append(events, event)
