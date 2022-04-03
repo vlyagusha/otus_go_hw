@@ -26,14 +26,14 @@ func New(ctx context.Context, dsn string) *Storage {
 	}
 }
 
-func (s *Storage) Connect(ctx context.Context) app.Storage {
+func (s *Storage) Connect(ctx context.Context) (app.Storage, error) {
 	conn, err := pgx.Connect(ctx, s.dsn)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to connect database: %v\n", err)
-		os.Exit(1)
+		return nil, err
 	}
 	s.conn = conn
-	return s
+	return s, nil
 }
 
 func (s *Storage) Close(ctx context.Context) error {
@@ -42,15 +42,8 @@ func (s *Storage) Close(ctx context.Context) error {
 
 func (s *Storage) Create(e storage.Event) error {
 	sql := `
-insert into events (
-	id,
-    title,
-    started_at,
-    finished_at,
-    description,
-    user_id,
-    notify
-) values ($1, $2, $3, $4, $5, $6, $7)
+insert into events (id, title, started_at, finished_at, description, user_id, notify) 
+values ($1, $2, $3, $4, $5, $6, $7)
 `
 	_, err := s.conn.Exec(
 		s.ctx,
@@ -131,7 +124,7 @@ where id = $1
 }
 
 func (s *Storage) FindAll() ([]storage.Event, error) {
-	events := make([]storage.Event, 0)
+	var events []storage.Event
 
 	sql := `
 select id, title, started_at, finished_at, description, user_id, notify 

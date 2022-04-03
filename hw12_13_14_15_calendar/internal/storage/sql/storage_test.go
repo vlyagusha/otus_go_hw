@@ -35,7 +35,7 @@ func TestStorage(t *testing.T) {
 
 	ctx := context.Background()
 	storage := New(ctx, config.Storage.Dsn)
-	if err := storage.Connect(ctx); err != nil {
+	if _, err := storage.Connect(ctx); err != nil {
 		t.Fatal("Failed to connect to DB server", err)
 	}
 

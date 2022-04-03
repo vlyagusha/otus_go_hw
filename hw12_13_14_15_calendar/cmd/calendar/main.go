@@ -4,7 +4,6 @@ import (
 	"context"
 	"flag"
 	"log"
-	"os"
 	"os/signal"
 	"syscall"
 	"time"
@@ -39,15 +38,18 @@ func main() {
 
 	logg, err := internallogger.New(config.Logger)
 	if err != nil {
-		logg.Error("failed to create logger: " + err.Error())
-		os.Exit(1)
+		log.Fatalf("Failed to create logger: %s", err)
 	}
 
-	ctx, cancel := signal.NotifyContext(context.Background(),
-		syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
+	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
 	defer cancel()
 
-	storage := createStorage(ctx, *config)
+	storage, err := createStorage(ctx, *config)
+	if err != nil {
+		cancel()
+		log.Fatalf("Failed to create storage: %s", err) //nolint:gocritic
+	}
+
 	calendar := app.New(logg, storage)
 
 	serverGrpc := internalgrpc.NewServer(logg, calendar, config.HTTP.Host, config.GRPC.Port)
@@ -85,18 +87,27 @@ func main() {
 
 	logg.Info("calendar is running...")
 
+	if err := server.Start(ctx); err != nil {
+		cancel()
+		log.Fatalf("Failed to start http server: %s", err)
+	}
+
 	<-ctx.Done()
 }
 
-func createStorage(ctx context.Context, config internalconfig.Config) app.Storage {
+func createStorage(ctx context.Context, config internalconfig.Config) (app.Storage, error) {
 	var storage app.Storage
+	var err error
 	switch config.Storage.Type {
 	case internalconfig.InMemory:
 		storage = memorystorage.New()
 	case internalconfig.SQL:
-		storage = sqlstorage.New(ctx, config.Storage.Dsn).Connect(ctx)
+		storage, err = sqlstorage.New(ctx, config.Storage.Dsn).Connect(ctx)
+		if err != nil {
+			return nil, err
+		}
 	default:
 		log.Fatalf("Unknown storage type: %s\n", config.Storage.Type)
 	}
-	return storage
+	return storage, nil
 }
