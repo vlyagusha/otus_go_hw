@@ -132,19 +132,13 @@ order by date
 	return events, nil
 }
 
-func (s *Storage) FindOnDay(day time.Time) ([]storage.Event, error) {
+func (s *Storage) FindOnDay(day time.Time) ([]storage.Event, error) { //nolint:dupl
 	var events []storage.Event
 
-	sql := `
-select id, title, started_at, finished_at, description, user_id, notify 
-from events
-where started_at >= $1 and started_at <= $2
-order by date
-`
 	from := day.AddDate(0, 0, 1).Format(time.RFC3339)
 	to := day.AddDate(0, 0, 1).Format(time.RFC3339)
 
-	rows, err := s.conn.Query(s.ctx, sql, from, to)
+	rows, err := s.findOnDate(from, to)
 	if err != nil {
 		return nil, err
 	}
@@ -174,19 +168,13 @@ order by date
 	return events, nil
 }
 
-func (s *Storage) FindOnWeek(dayStart time.Time) ([]storage.Event, error) {
+func (s *Storage) FindOnWeek(dayStart time.Time) ([]storage.Event, error) { //nolint:dupl
 	var events []storage.Event
 
-	sql := `
-select id, title, started_at, finished_at, description, user_id, notify 
-from events
-where started_at >= $1 and started_at <= $2
-order by date
-`
 	from := dayStart.AddDate(0, 0, 7).Format(time.RFC3339)
 	to := dayStart.AddDate(0, 0, 7).Format(time.RFC3339)
 
-	rows, err := s.conn.Query(s.ctx, sql, from, to)
+	rows, err := s.findOnDate(from, to)
 	if err != nil {
 		return nil, err
 	}
@@ -216,19 +204,13 @@ order by date
 	return events, nil
 }
 
-func (s *Storage) FindOnMonth(dayStart time.Time) ([]storage.Event, error) {
+func (s *Storage) FindOnMonth(dayStart time.Time) ([]storage.Event, error) { //nolint:dupl
 	var events []storage.Event
 
-	sql := `
-select id, title, started_at, finished_at, description, user_id, notify 
-from events
-where started_at >= $1 and started_at <= $2
-order by date
-`
 	from := dayStart.AddDate(0, 1, 0).Format(time.RFC3339)
 	to := dayStart.AddDate(0, 1, 0).Format(time.RFC3339)
 
-	rows, err := s.conn.Query(s.ctx, sql, from, to)
+	rows, err := s.findOnDate(from, to)
 	if err != nil {
 		return nil, err
 	}
@@ -256,4 +238,14 @@ order by date
 	}
 
 	return events, nil
+}
+
+func (s *Storage) findOnDate(from, to string) (pgx.Rows, error) {
+	const searchSQL = `
+select id, title, started_at, finished_at, description, user_id, notify 
+from events
+where started_at >= $1 and started_at <= $2
+order by date
+`
+	return s.conn.Query(s.ctx, searchSQL, from, to)
 }
