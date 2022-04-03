@@ -14,7 +14,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-const DefaultConfigFile = "configs/calendar_config.yaml"
+const DefaultConfigFile = "../../../configs/calendar_config_test.yaml"
 
 func TestStorage(t *testing.T) {
 	if _, err := os.Stat(DefaultConfigFile); errors.Is(err, os.ErrNotExist) {
@@ -134,4 +134,96 @@ func TestStorage(t *testing.T) {
 			t.Fatal("Failed to rollback tx", err)
 		}
 	})
+
+	t.Run("test notify list", func(t *testing.T) {
+		tx, err := storage.conn.BeginTx(ctx, pgx.TxOptions{
+			IsoLevel:       pgx.Serializable,
+			AccessMode:     pgx.ReadWrite,
+			DeferrableMode: pgx.NotDeferrable,
+		})
+		if err != nil {
+			t.Fatal("Failed to connect to DB server", err)
+		}
+
+		userID := uuid.New()
+		events := []sqlstorage.Event{
+			{
+				ID:          parseUUID("4927aa58-a175-429a-a125-c04765597150"),
+				StartedAt:   parseDateTime("2022-04-03 11:59:59"),
+				Notify:      parseDateTime("2022-04-03 11:59:59"),
+				UserID:      userID,
+				Title:       "Title 1",
+				Description: "Desc 1",
+				FinishedAt:  parseDateTime("2022-04-10 12:00:00"),
+			},
+			{
+				ID:          parseUUID("4927aa58-a175-429a-a125-c04765597151"),
+				StartedAt:   parseDateTime("2022-04-03 12:00:00"),
+				Notify:      parseDateTime("2022-04-03 12:00:00"),
+				UserID:      userID,
+				Title:       "Title 2",
+				Description: "Desc 2",
+				FinishedAt:  parseDateTime("2022-04-10 12:00:00"),
+			},
+			{
+				ID:          parseUUID("4927aa58-a175-429a-a125-c04765597152"),
+				StartedAt:   parseDateTime("2022-04-04 12:00:00"),
+				Notify:      parseDateTime("2022-04-03 12:00:00"),
+				UserID:      userID,
+				Title:       "Title 3",
+				Description: "Desc 3",
+				FinishedAt:  parseDateTime("2022-04-10 12:00:00"),
+			},
+			{
+				ID:          parseUUID("4927aa58-a175-429a-a125-c04765597153"),
+				StartedAt:   parseDateTime("2022-04-05 12:00:01"),
+				Notify:      parseDateTime("2022-04-04 11:59:01"),
+				UserID:      userID,
+				Title:       "Title 4",
+				Description: "Desc 4",
+				FinishedAt:  parseDateTime("2022-04-10 12:00:00"),
+			},
+		}
+
+		for _, e := range events {
+			_ = storage.Create(e)
+		}
+
+		readyEvents, err := storage.GetEventsReadyToNotify(parseDateTime("2022-04-03 12:00:00"))
+		require.Nil(t, err)
+
+		ids := extractEventIDs(readyEvents)
+		idsExpected := []string{
+			"4927aa58-a175-429a-a125-c04765597150",
+			"4927aa58-a175-429a-a125-c04765597151",
+			"4927aa58-a175-429a-a125-c04765597152",
+		}
+		require.Equal(t, idsExpected, ids)
+
+		err = tx.Rollback(ctx)
+		if err != nil {
+			t.Fatal("Failed to rollback tx", err)
+		}
+	})
+}
+
+func parseUUID(stringUUID string) uuid.UUID {
+	res, _ := uuid.Parse(stringUUID)
+
+	return res
+}
+
+func parseDateTime(stringDateTime string) time.Time {
+	res, _ := time.Parse("2006-01-02 15:04:05", stringDateTime)
+
+	return res
+}
+
+func extractEventIDs(events []sqlstorage.Event) []string {
+	res := make([]string, 0, len(events))
+	for _, e := range events {
+		res = append(res, e.ID.String())
+	}
+
+	return res
 }

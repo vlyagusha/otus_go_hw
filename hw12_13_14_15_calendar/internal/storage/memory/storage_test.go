@@ -96,7 +96,7 @@ func TestStorage(t *testing.T) {
 		require.Len(t, saved, 0)
 	})
 
-	t.Run("test ", func(t *testing.T) {
+	t.Run("test notify list", func(t *testing.T) {
 		events := []memorystorage.Event{
 			{
 				ID:        parseUUID("4927aa58-a175-429a-a125-c04765597150"),
