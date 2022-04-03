@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/vlyagusha/otus_go_hw/hw12_13_14_15_calendar/internal/storage"
@@ -24,6 +25,9 @@ type Storage interface {
 	Update(e storage.Event) error
 	Delete(id uuid.UUID) error
 	FindAll() ([]storage.Event, error)
+	FindOnDay(day time.Time) ([]storage.Event, error)
+	FindOnWeek(dayStart time.Time) ([]storage.Event, error)
+	FindOnMonth(dayStart time.Time) ([]storage.Event, error)
 }
 
 func New(logger Logger, storage Storage) *App {
