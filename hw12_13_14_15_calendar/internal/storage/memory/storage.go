@@ -80,6 +80,10 @@ func (s *Storage) FindOnDay(day time.Time) ([]storage.Event, error) {
 			events = append(events, event)
 		}
 	}
+	sort.Slice(events, func(i, j int) bool {
+		return events[i].StartedAt.Unix() < events[j].StartedAt.Unix()
+	})
+
 	return events, nil
 }
 
@@ -95,6 +99,10 @@ func (s *Storage) FindOnWeek(dayStart time.Time) ([]storage.Event, error) {
 			events = append(events, event)
 		}
 	}
+	sort.Slice(events, func(i, j int) bool {
+		return events[i].StartedAt.Unix() < events[j].StartedAt.Unix()
+	})
+
 	return events, nil
 }
 
@@ -110,6 +118,10 @@ func (s *Storage) FindOnMonth(dayStart time.Time) ([]storage.Event, error) {
 			events = append(events, event)
 		}
 	}
+	sort.Slice(events, func(i, j int) bool {
+		return events[i].StartedAt.Unix() < events[j].StartedAt.Unix()
+	})
+
 	return events, nil
 }
 

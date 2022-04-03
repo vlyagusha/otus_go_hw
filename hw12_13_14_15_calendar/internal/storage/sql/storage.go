@@ -129,7 +129,7 @@ func (s *Storage) FindAll() ([]storage.Event, error) {
 	sql := `
 select id, title, started_at, finished_at, description, user_id, notify 
 from events
-order by date
+order by started_at
 `
 	rows, err := s.conn.Query(s.ctx, sql)
 	if err != nil {
@@ -274,7 +274,7 @@ func (s *Storage) findOnDate(from, to string) (pgx.Rows, error) {
 select id, title, started_at, finished_at, description, user_id, notify 
 from events
 where started_at >= $1 and started_at <= $2
-order by date
+order by started_at
 `
 	return s.conn.Query(s.ctx, searchSQL, from, to)
 }
