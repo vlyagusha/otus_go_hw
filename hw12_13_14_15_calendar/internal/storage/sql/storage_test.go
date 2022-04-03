@@ -16,7 +16,7 @@ import (
 
 const DefaultConfigFile = "../../../configs/calendar_config_test.yaml"
 
-func TestStorage(t *testing.T) {
+func TestStorage(t *testing.T) { //nolint:funlen,gocognit,nolintlint
 	if _, err := os.Stat(DefaultConfigFile); errors.Is(err, os.ErrNotExist) {
 		t.Skip(DefaultConfigFile + " file does not exists")
 	}

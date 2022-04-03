@@ -15,6 +15,6 @@ func (t *LogNotificationTransport) String() string {
 }
 
 func (t *LogNotificationTransport) Send(n app.Notification) error {
-	t.logger.Info("[notification][transport][log] %v", n)
+	t.logger.Info("[notification][transport][log] %s", n)
 	return nil
 }

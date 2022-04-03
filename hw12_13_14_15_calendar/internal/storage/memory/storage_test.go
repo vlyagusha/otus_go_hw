@@ -9,7 +9,7 @@ import (
 	memorystorage "github.com/vlyagusha/otus_go_hw/hw12_13_14_15_calendar/internal/storage"
 )
 
-func TestStorage(t *testing.T) {
+func TestStorage(t *testing.T) { //nolint:funlen,gocognit,nolintlint
 	storage := New()
 
 	t.Run("common test", func(t *testing.T) {
