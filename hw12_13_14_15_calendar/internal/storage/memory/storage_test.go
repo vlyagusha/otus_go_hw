@@ -100,23 +100,23 @@ func TestStorage(t *testing.T) { //nolint:funlen,gocognit,nolintlint
 		events := []memorystorage.Event{
 			{
 				ID:        parseUUID(t, "4927aa58-a175-429a-a125-c04765597150"),
-				StartedAt: parseDate(t, "2022-04-03 11:59:59"),
-				Notify:    parseDate(t, "2022-04-03 11:59:59"),
+				StartedAt: parseDate(t, "2022-04-03T11:59:59Z"),
+				Notify:    parseDate(t, "2022-04-03T11:59:59Z"),
 			},
 			{
 				ID:        parseUUID(t, "4927aa58-a175-429a-a125-c04765597151"),
-				StartedAt: parseDate(t, "2022-04-03 12:00:00"),
-				Notify:    parseDate(t, "2022-04-03 12:00:00"),
+				StartedAt: parseDate(t, "2022-04-03T12:00:00Z"),
+				Notify:    parseDate(t, "2022-04-03T12:00:00Z"),
 			},
 			{
 				ID:        parseUUID(t, "4927aa58-a175-429a-a125-c04765597152"),
-				StartedAt: parseDate(t, "2022-04-04 12:00:00"),
-				Notify:    parseDate(t, "2022-04-03 12:00:00"),
+				StartedAt: parseDate(t, "2022-04-04T12:00:00Z"),
+				Notify:    parseDate(t, "2022-04-03T12:00:00Z"),
 			},
 			{
 				ID:        parseUUID(t, "4927aa58-a175-429a-a125-c04765597153"),
-				StartedAt: parseDate(t, "2022-04-05 12:00:01"),
-				Notify:    parseDate(t, "2022-04-04 11:59:01"),
+				StartedAt: parseDate(t, "2022-04-05T12:00:01Z"),
+				Notify:    parseDate(t, "2022-04-04T11:59:01Z"),
 			},
 		}
 
@@ -124,7 +124,7 @@ func TestStorage(t *testing.T) { //nolint:funlen,gocognit,nolintlint
 			_ = storage.Create(e)
 		}
 
-		readyEvents, err := storage.GetEventsReadyToNotify(parseDate(t, "2022-04-03 12:00:00"))
+		readyEvents, err := storage.GetEventsReadyToNotify(parseDate(t, "2022-04-03T12:00:00Z"))
 		require.Nil(t, err)
 
 		ids := extractEventIDs(readyEvents)
