@@ -27,6 +27,9 @@ type Storage interface {
 	Delete(id uuid.UUID) error
 	Find(id uuid.UUID) (*storage.Event, error)
 	FindAll() ([]storage.Event, error)
+	FindOnDay(day time.Time) ([]storage.Event, error)
+	FindOnWeek(dayStart time.Time) ([]storage.Event, error)
+	FindOnMonth(dayStart time.Time) ([]storage.Event, error)
 }
 
 func New(logger Logger, storage Storage) *App {
