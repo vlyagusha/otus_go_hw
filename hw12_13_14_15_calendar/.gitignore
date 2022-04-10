@@ -1,4 +1,4 @@
 logs/
 bin/
 data/
-deployments/.env
+.env

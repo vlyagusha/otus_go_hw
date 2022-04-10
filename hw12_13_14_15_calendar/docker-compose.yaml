@@ -1,0 +1,70 @@
+version: "3.4"
+services:
+  app:
+    build:
+      context: .
+      dockerfile: ./build/calendar/Dockerfile
+    depends_on:
+      - postgres
+    ports:
+      - "8012:80"
+      - "8013:8080"
+    environment:
+      - APP_CONFIG_FILE=${APP_CONFIG_FILE}
+
+  scheduler:
+    build:
+      context: .
+      dockerfile: ./build/scheduler/Dockerfile
+    depends_on:
+      - postgres
+    environment:
+      - SCHEDULER_CONFIG_FILE=${SCHEDULER_CONFIG_FILE}
+    command: [ "/bin/sh", "-c", "net-wait-go -addrs queue:5672 && /opt/calendar/sheduler" ]
+
+  sender:
+    build:
+      context: .
+      dockerfile: ./build/sender/Dockerfile
+    depends_on:
+      - postgres
+    environment:
+      - SENDER_CONFIG_FILE=${SENDER_CONFIG_FILE}
+    command: [ "/bin/sh", "-c", "net-wait-go -addrs queue:5672 && /opt/calendar/sender" ]
+  
+  postgres:
+    container_name: vlyagusha-postgres
+    image: postgres:14.2
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "54321:5432"
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+      - ./migrations/initdb:/docker-entrypoint-initdb.d
+    networks:
+      localnet:
+        aliases:
+          - ${APP_HOST}
+  rabbit:
+    image: rabbitmq:3.9.14-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  migrations:
+    build:
+      context: .
+      dockerfile: ./build/migrations/Dockerfile
+    depends_on:
+      - postgres
+    environment:
+      - GOOSE_DRIVER=postgres
+      - GOOSE_DBSTRING=${STORAGE_DSN}
+    command: [ "/bin/sh", "-c", "net-wait-go -addrs db:5432 && sleep 5 && /bin/goose up" ]
+
+networks:
+  localnet:
+    driver: bridge

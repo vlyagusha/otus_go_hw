@@ -28,6 +28,14 @@ version: build
 test:
 	go test -race ./internal/...
 
+integration-tests:
+	set -e ;\
+	docker-compose -f docker-compose.test.yaml up --build -d ;\
+	test_status_code=0 ;\
+	docker-compose -f docker-compose.test.yaml run tests go test github.com/vlyagusha/otus_go_hw/hw12_13_14_15_calendar/cmd/calendar_tests || test_status_code=$$? ;\
+	docker-compose -f docker-compose.test.yaml down ;\
+	exit $$test_status_code ;
+
 install-lint-deps:
 	(which golangci-lint > /dev/null) || curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(shell go env GOPATH)/bin v1.41.1
 
@@ -39,5 +47,11 @@ migrate:
 
 generate:
 	go generate ./...
+
+up:
+	docker-compose up -d
+
+down:
+	docker-compose down
 
 .PHONY: build run build-img run-img version test lint
