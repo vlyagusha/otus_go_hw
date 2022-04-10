@@ -35,7 +35,4 @@ COPY --from=build ${BIN_FILE} ${BIN_FILE}
 
 COPY --from=build /go/bin/net-wait-go /bin/net-wait-go
 
-ENV CONFIG_FILE ${SCHEDULER_CONFIG_FILE}
-COPY ./configs/scheduler_config.yaml ${CONFIG_FILE}
-
-CMD ${BIN_FILE} -config ${CONFIG_FILE}
+CMD ${BIN_FILE}

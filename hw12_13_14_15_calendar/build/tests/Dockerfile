@@ -12,4 +12,4 @@ RUN go mod download
 
 COPY . "/opt/calendar/"
 
-# CMD ["go", "test", "github.com/vlyagusha/otus_go_hw/hw12_13_14_15_calendar/cmd/calendar_tests"]
+# CMD ["go", "test", "github.com/vlyagusha/otus_go_hw/hw12_13_14_15_calendar/cmd/tests"]

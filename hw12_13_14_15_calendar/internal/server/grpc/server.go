@@ -61,7 +61,7 @@ func (s *Server) Start() error {
 		return fmt.Errorf("failed to start GRPC service: %w", err)
 	}
 
-	s.logg.Info("Start GRPC Server on %d", s.port)
+	s.logg.Info("Start GRPC Server on %s", s.port)
 
 	return s.grpcSrv.Serve(lsn)
 }

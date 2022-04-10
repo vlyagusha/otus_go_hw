@@ -1,36 +1,58 @@
 version: "3.4"
 services:
   app:
+    container_name: vlyagusha-app
     build:
       context: .
       dockerfile: ./build/calendar/Dockerfile
     depends_on:
       - postgres
     ports:
-      - "8012:80"
-      - "8013:8080"
+      - "8008:80"
+      - "8088:8080"
     environment:
-      - APP_CONFIG_FILE=${APP_CONFIG_FILE}
+      LOG_LEVEL: ${LOG_LEVEL}
+      LOG_FILENAME: ${LOG_FILENAME}
+      STORAGE_TYPE: ${STORAGE_TYPE}
+      STORAGE_DSN: ${STORAGE_DSN}
+      HTTP_HOST: ${HTTP_HOST}
+      HTTP_PORT: ${HTTP_PORT}
+      GRPC_HOST: ${GRPC_HOST}
+      GRPC_PORT: ${GRPC_PORT}
 
   scheduler:
+    container_name: vlyagusha-scheduler
     build:
       context: .
       dockerfile: ./build/scheduler/Dockerfile
     depends_on:
       - postgres
     environment:
-      - SCHEDULER_CONFIG_FILE=${SCHEDULER_CONFIG_FILE}
-    command: [ "/bin/sh", "-c", "net-wait-go -addrs queue:5672 && /opt/calendar/sheduler" ]
+      LOG_LEVEL: ${LOG_LEVEL}
+      LOG_FILENAME: ${LOG_FILENAME}
+      STORAGE_TYPE: ${STORAGE_TYPE}
+      STORAGE_DSN: "postgresql://postgres:postgres@postgres:5432/calendar?sslmode=disable"
+      RABBIT_DSN: "amqp://guest:guest@rabbit:5672"
+      RABBIT_EXCHANGE: "calendar"
+      RABBIT_QUEUE: "notifications"
+    command: [ "/bin/sh", "-c", "net-wait-go -addrs rabbit:5672 && /opt/calendar/sheduler" ]
 
   sender:
+    container_name: vlyagusha-sender
     build:
       context: .
       dockerfile: ./build/sender/Dockerfile
     depends_on:
       - postgres
     environment:
-      - SENDER_CONFIG_FILE=${SENDER_CONFIG_FILE}
-    command: [ "/bin/sh", "-c", "net-wait-go -addrs queue:5672 && /opt/calendar/sender" ]
+      LOG_LEVEL: ${LOG_LEVEL}
+      LOG_FILENAME: ${LOG_FILENAME}
+      STORAGE_TYPE: ${STORAGE_TYPE}
+      STORAGE_DSN: "postgresql://postgres:postgres@postgres:5432/calendar?sslmode=disable"
+      RABBIT_DSN: "amqp://guest:guest@rabbit:5672"
+      RABBIT_EXCHANGE: "calendar"
+      RABBIT_QUEUE: "notifications"
+    command: [ "/bin/sh", "-c", "net-wait-go -addrs rabbit:5672 && /opt/calendar/sender" ]
   
   postgres:
     container_name: vlyagusha-postgres
@@ -48,23 +70,41 @@ services:
       localnet:
         aliases:
           - ${APP_HOST}
+
   rabbit:
+    container_name: vlyagusha-rabbit
     image: rabbitmq:3.9.14-management
     ports:
-      - "5672:5672"
+      #      - "5672:5672"
       - "15672:15672"
 
   migrations:
+    container_name: vlyagusha-migrations
     build:
       context: .
       dockerfile: ./build/migrations/Dockerfile
     depends_on:
       - postgres
     environment:
-      - GOOSE_DRIVER=postgres
-      - GOOSE_DBSTRING=${STORAGE_DSN}
-    command: [ "/bin/sh", "-c", "net-wait-go -addrs db:5432 && sleep 5 && /bin/goose up" ]
+      GOOSE_DRIVER: postgres
+      GOOSE_DBSTRING: "postgresql://postgres:postgres@postgres:5432/calendar?sslmode=disable"
+    command: [ "/bin/sh", "-c", "net-wait-go -addrs postgres:5432 && sleep 5 && /bin/goose up" ]
+
+  tests:
+    container_name: vlyagusha-tests
+    build:
+      context: .
+      dockerfile: ./build/tests/Dockerfile
+    environment:
+      APP_HOST: "http://app"
+      APP_HOST_GRPC: "app:8080"
+    command: [ "/bin/sh", "-c", "net-wait-go -addrs app:80,rabbit:5672 && go test github.com/vlyagusha/otus_go_hw/hw12_13_14_15_calendar/cmd/tests" ]
+    volumes:
+      - logs:/var/logs
 
 networks:
   localnet:
     driver: bridge
+
+volumes:
+  logs:

@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"flag"
 	"log"
 	"os/signal"
 	"syscall"
@@ -14,16 +13,8 @@ import (
 	transport "github.com/vlyagusha/otus_go_hw/hw12_13_14_15_calendar/internal/transport/log"
 )
 
-var configFile string
-
-func init() {
-	flag.StringVar(&configFile, "config", "configs/sender_config.yaml", "Path to configuration file")
-}
-
 func main() {
-	flag.Parse()
-
-	config, err := internalconfig.LoadSenderConfig(configFile)
+	config, err := internalconfig.LoadSenderConfig()
 	if err != nil {
 		log.Fatalf("Failed to load config: %s", err)
 	}

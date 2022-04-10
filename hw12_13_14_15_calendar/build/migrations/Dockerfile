@@ -14,7 +14,7 @@ WORKDIR /var/migrations
 
 COPY migrations/* /var/migrations/
 
-ENV DRIVER=postgres
-ENV DSN=""
+ENV DRIVER=${GOOSE_DRIVER}
+ENV DSN=${GOOSE_DBSTRING}
 
 CMD ["/bin/goose", "up"]

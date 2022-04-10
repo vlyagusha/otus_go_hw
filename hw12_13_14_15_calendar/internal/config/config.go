@@ -1,10 +1,7 @@
 package config
 
 import (
-	"fmt"
 	"os"
-
-	yamlv3 "gopkg.in/yaml.v3"
 )
 
 type Config struct {
@@ -80,47 +77,59 @@ func NewSenderConfig() SenderConfig {
 	return SenderConfig{}
 }
 
-func LoadConfig(path string) (*Config, error) {
-	configContent, err := os.ReadFile(path)
-	if err != nil {
-		return nil, fmt.Errorf("invalid config file %s: %w", path, err)
-	}
-
-	config := NewConfig()
-	err = yamlv3.Unmarshal(configContent, &config)
-	if err != nil {
-		return nil, fmt.Errorf("invalid config file content %s: %w", path, err)
-	}
-
-	return &config, nil
+func LoadConfig() (*Config, error) {
+	return &Config{
+		Logger: LoggerConf{
+			Level:    Level(os.Getenv("LOG_LEVEL")),
+			Filename: os.Getenv("LOG_FILENAME"),
+		},
+		Storage: StorageConf{
+			Type: StorageType(os.Getenv("STORAGE_TYPE")),
+			Dsn:  os.Getenv("STORAGE_DSN"),
+		},
+		HTTP: HTTPConf{
+			Host: os.Getenv("HTTP_HOST"),
+			Port: os.Getenv("HTTP_PORT"),
+		},
+		GRPC: GRPCConf{
+			Host: os.Getenv("GRPC_HOST"),
+			Port: os.Getenv("GRPC_PORT"),
+		},
+	}, nil
 }
 
-func LoadSchedulerConfig(path string) (*SchedulerConfig, error) {
-	configContent, err := os.ReadFile(path)
-	if err != nil {
-		return nil, fmt.Errorf("invalid config file %s: %w", path, err)
-	}
-
-	config := NewSchedulerConfig()
-	err = yamlv3.Unmarshal(configContent, &config)
-	if err != nil {
-		return nil, fmt.Errorf("invalid config file content %s: %w", path, err)
-	}
-
-	return &config, nil
+func LoadSchedulerConfig() (*SchedulerConfig, error) {
+	return &SchedulerConfig{
+		Logger: LoggerConf{
+			Level:    Level(os.Getenv("LOG_LEVEL")),
+			Filename: os.Getenv("LOG_FILENAME"),
+		},
+		Storage: StorageConf{
+			Type: StorageType(os.Getenv("STORAGE_TYPE")),
+			Dsn:  os.Getenv("STORAGE_DSN"),
+		},
+		Rabbit: RabbitConf{
+			Dsn:      os.Getenv("RABBIT_DSN"),
+			Exchange: os.Getenv("RABBIT_EXCHANGE"),
+			Queue:    os.Getenv("RABBIT_QUEUE"),
+		},
+	}, nil
 }
 
-func LoadSenderConfig(path string) (*SenderConfig, error) {
-	configContent, err := os.ReadFile(path)
-	if err != nil {
-		return nil, fmt.Errorf("invalid config file %s: %w", path, err)
-	}
-
-	config := NewSenderConfig()
-	err = yamlv3.Unmarshal(configContent, &config)
-	if err != nil {
-		return nil, fmt.Errorf("invalid config file content %s: %w", path, err)
-	}
-
-	return &config, nil
+func LoadSenderConfig() (*SenderConfig, error) {
+	return &SenderConfig{
+		Logger: LoggerConf{
+			Level:    Level(os.Getenv("LOG_LEVEL")),
+			Filename: os.Getenv("LOG_FILENAME"),
+		},
+		Storage: StorageConf{
+			Type: StorageType(os.Getenv("STORAGE_TYPE")),
+			Dsn:  os.Getenv("STORAGE_DSN"),
+		},
+		Rabbit: RabbitConf{
+			Dsn:      os.Getenv("RABBIT_DSN"),
+			Exchange: os.Getenv("RABBIT_EXCHANGE"),
+			Queue:    os.Getenv("RABBIT_QUEUE"),
+		},
+	}, nil
 }
