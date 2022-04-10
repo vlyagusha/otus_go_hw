@@ -76,7 +76,12 @@ func (s *ServerHandlers) UpdateEvent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	responseData, _ := json.Marshal(dto)
+	responseData, err := json.Marshal(dto)
+	if err != nil {
+		RespondError(w, http.StatusBadRequest, err)
+		return
+	}
+
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	w.Write(responseData)
