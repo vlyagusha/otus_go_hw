@@ -309,7 +309,7 @@ where started_at <= $1
 	return createEventsFromRows(rows)
 }
 
-func createEventsFromRows(rows pgx.Rows) ([]storage.Event, error) {
+func createEventsFromRows(rows pgxv4.Rows) ([]storage.Event, error) {
 	var events []storage.Event
 
 	for rows.Next() {

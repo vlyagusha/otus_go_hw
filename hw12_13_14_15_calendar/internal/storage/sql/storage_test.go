@@ -136,10 +136,10 @@ func TestStorage(t *testing.T) { //nolint:funlen,gocognit,nolintlint
 	})
 
 	t.Run("test notify list", func(t *testing.T) {
-		tx, err := storage.conn.BeginTx(ctx, pgx.TxOptions{
-			IsoLevel:       pgx.Serializable,
-			AccessMode:     pgx.ReadWrite,
-			DeferrableMode: pgx.NotDeferrable,
+		tx, err := storage.conn.BeginTx(ctx, pgxv4.TxOptions{
+			IsoLevel:       pgxv4.Serializable,
+			AccessMode:     pgxv4.ReadWrite,
+			DeferrableMode: pgxv4.NotDeferrable,
 		})
 		if err != nil {
 			t.Fatal("Failed to connect to DB server", err)

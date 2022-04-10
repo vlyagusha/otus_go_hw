@@ -102,7 +102,7 @@ func LoadSchedulerConfig(path string) (*SchedulerConfig, error) {
 	}
 
 	config := NewSchedulerConfig()
-	err = yaml.Unmarshal(configContent, &config)
+	err = yamlv3.Unmarshal(configContent, &config)
 	if err != nil {
 		return nil, fmt.Errorf("invalid config file content %s: %w", path, err)
 	}
@@ -117,7 +117,7 @@ func LoadSenderConfig(path string) (*SenderConfig, error) {
 	}
 
 	config := NewSenderConfig()
-	err = yaml.Unmarshal(configContent, &config)
+	err = yamlv3.Unmarshal(configContent, &config)
 	if err != nil {
 		return nil, fmt.Errorf("invalid config file content %s: %w", path, err)
 	}
