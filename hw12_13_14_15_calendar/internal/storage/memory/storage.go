@@ -120,8 +120,8 @@ func (s *Storage) FindOnMonth(dayStart time.Time) ([]storage.Event, error) {
 }
 
 func (s *Storage) Find(id uuid.UUID) (*storage.Event, error) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
+	s.mu.RLock()
+	defer s.mu.RUnlock()
 
 	if event, ok := s.events[id]; ok {
 		return &event, nil
