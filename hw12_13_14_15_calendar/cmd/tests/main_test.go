@@ -18,10 +18,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-// test stores the HTTP testing client preconfigured
-// var http = baloo.New(os.Getenv("APP_HOST"))
-
-func TestMain2(t *testing.T) {
+func TestBasic(t *testing.T) {
 	host := os.Getenv("APP_HOST")
 
 	httpClient := http.Client{}
@@ -35,7 +32,6 @@ func TestMain2(t *testing.T) {
 	res.Body.Close()
 	require.Equal(t, "[]", buf.String())
 
-	// Создадим новое событие
 	body := `{
 		"id": "4927aa58-a175-429a-a125-c04765597152",
 		"title": "Event Title 1",
@@ -53,7 +49,6 @@ func TestMain2(t *testing.T) {
 	}
 	require.Equal(t, 201, respCode)
 
-	// Созданное событие можно прочитать в общем списке
 	resCode, resBody, err := RESTGet(&httpClient, host+"/events")
 	if err != nil {
 		t.Errorf("Failed to get /events: %s", err)
@@ -63,7 +58,6 @@ func TestMain2(t *testing.T) {
 	require.Equal(t, bodyExpected, resBody)
 	require.Equal(t, 200, resCode)
 
-	// Попробуем создать ещё одно такое же события - должны получить ОШИБКУ
 	respCode, respBody, err := RESTPost(&httpClient, host+"/events", body)
 	if err != nil {
 		t.Errorf("Failed to create /events: %s", err)
@@ -73,7 +67,6 @@ func TestMain2(t *testing.T) {
 	require.Equal(t, bodyExpected, respBody)
 	require.Equal(t, 400, respCode)
 
-	// Обновим событие
 	body = `{
 		"id": "4927aa58-a175-429a-a125-c04765597152",
 		"title": "Event Title 2",
@@ -90,7 +83,6 @@ func TestMain2(t *testing.T) {
 	}
 	require.Equal(t, 200, respCode)
 
-	// Прочитаем обновления
 	respCode, respBody, err = RESTGet(&httpClient, host+"/events")
 	if err != nil {
 		t.Errorf("Failed to get /events: %s", err)
@@ -100,15 +92,12 @@ func TestMain2(t *testing.T) {
 	require.Equal(t, bodyExpected, respBody)
 	require.Equal(t, 200, respCode)
 
-	// Удалим событие
 	_, _, err = RESTDelete(&httpClient, host+"/events/4927aa58-a175-429a-a125-c04765597152")
 	if err != nil {
 		t.Errorf("Failed to get /events: %s", err)
 		t.FailNow()
 	}
 
-	// Удалённого события больше нет в списке
-	// Созданное событие можно прочитать в общем списке
 	respCode, respBody, err = RESTGet(&httpClient, host+"/events")
 	if err != nil {
 		t.Errorf("Failed to get /events: %s", err)
@@ -118,7 +107,6 @@ func TestMain2(t *testing.T) {
 	require.Equal(t, bodyExpected, respBody)
 	require.Equal(t, 200, respCode)
 
-	// Проверим, что было уведомление о нашем событии, так как мы его создали в прошлом
 	time.Sleep(time.Second * 10)
 	logFileName := "/var/logs/app.log"
 	content, err := os.ReadFile(logFileName)
@@ -135,7 +123,7 @@ func TestMain2(t *testing.T) {
 
 var host = os.Getenv("APP_HOST_GRPC")
 
-func TestMainGrpc(t *testing.T) {
+func TestGrpc(t *testing.T) {
 	conn, err := grpc.Dial(host, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		t.Errorf("Failed to dial GRPC service: %s", err)
@@ -158,7 +146,7 @@ func TestMainGrpc(t *testing.T) {
 	assert.Nil(t, err)
 
 	req := internalgrpc.EventListRequest{
-		Date: "2021-12-01",
+		Date: "2022-04-10",
 	}
 	res, err := client.EventListMonth(ctx, &req)
 	assert.Nil(t, err)
