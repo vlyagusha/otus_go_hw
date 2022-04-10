@@ -8,10 +8,10 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v4"
+	pgxv4 "github.com/jackc/pgx/v4"
 	"github.com/stretchr/testify/require"
 	sqlstorage "github.com/vlyagusha/otus_go_hw/hw12_13_14_15_calendar/internal/storage"
-	"gopkg.in/yaml.v3"
+	yamlv3 "gopkg.in/yaml.v3"
 )
 
 const DefaultConfigFile = "../../../configs/calendar_config_test.yaml"
@@ -28,7 +28,7 @@ func TestStorage(t *testing.T) { //nolint:funlen,gocognit,nolintlint
 		}
 	}
 
-	err := yaml.Unmarshal(configContent, config)
+	err := yamlv3.Unmarshal(configContent, config)
 	if err != nil {
 		t.Fatal("Failed to unmarshal config", err)
 	}
@@ -40,10 +40,10 @@ func TestStorage(t *testing.T) { //nolint:funlen,gocognit,nolintlint
 	}
 
 	t.Run("test SQLStorage CRUDL", func(t *testing.T) {
-		tx, err := storage.conn.BeginTx(ctx, pgx.TxOptions{
-			IsoLevel:       pgx.Serializable,
-			AccessMode:     pgx.ReadWrite,
-			DeferrableMode: pgx.NotDeferrable,
+		tx, err := storage.conn.BeginTx(ctx, pgxv4.TxOptions{
+			IsoLevel:       pgxv4.Serializable,
+			AccessMode:     pgxv4.ReadWrite,
+			DeferrableMode: pgxv4.NotDeferrable,
 		})
 		if err != nil {
 			t.Fatal("Failed to connect to DB server", err)

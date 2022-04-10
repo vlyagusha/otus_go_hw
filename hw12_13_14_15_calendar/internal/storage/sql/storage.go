@@ -8,14 +8,14 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v4"
+	pgxv4 "github.com/jackc/pgx/v4"
 	"github.com/vlyagusha/otus_go_hw/hw12_13_14_15_calendar/internal/app"
 	"github.com/vlyagusha/otus_go_hw/hw12_13_14_15_calendar/internal/storage"
 )
 
 type Storage struct {
 	ctx  context.Context
-	conn *pgx.Conn
+	conn *pgxv4.Conn
 	dsn  string
 }
 
@@ -27,7 +27,7 @@ func New(ctx context.Context, dsn string) *Storage {
 }
 
 func (s *Storage) Connect(ctx context.Context) (app.Storage, error) {
-	conn, err := pgx.Connect(ctx, s.dsn)
+	conn, err := pgxv4.Connect(ctx, s.dsn)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to connect database: %v\n", err)
 		return nil, err
@@ -116,7 +116,7 @@ where id = $1
 	if err == nil {
 		return &e, nil
 	}
-	if errors.Is(err, pgx.ErrNoRows) {
+	if errors.Is(err, pgxv4.ErrNoRows) {
 		return nil, nil
 	}
 
@@ -269,7 +269,7 @@ func (s *Storage) FindOnMonth(dayStart time.Time) ([]storage.Event, error) { //n
 	return events, nil
 }
 
-func (s *Storage) findOnDate(from, to string) (pgx.Rows, error) {
+func (s *Storage) findOnDate(from, to string) (pgxv4.Rows, error) {
 	const searchSQL = `
 select id, title, started_at, finished_at, description, user_id, notify 
 from events

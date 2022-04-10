@@ -56,14 +56,15 @@ func (e *EventDto) GetModel() (*storage.Event, error) {
 }
 
 func CreateEventDtoFromModel(event storage.Event) EventDto {
-	eventDto := EventDto{}
-	eventDto.ID = event.ID.String()
-	eventDto.Title = event.Title
-	eventDto.StartedAt = event.StartedAt.Format(time.RFC3339)
-	eventDto.FinishedAt = event.FinishedAt.Format(time.RFC3339)
-	eventDto.Description = event.Description
-	eventDto.UserID = event.UserID.String()
-	eventDto.Notify = event.Notify.Format(time.RFC3339)
+	eventDto := EventDto{
+		ID:          event.ID.String(),
+		Title:       event.Title,
+		StartedAt:   event.StartedAt.Format(time.RFC3339),
+		FinishedAt:  event.FinishedAt.Format(time.RFC3339),
+		Description: event.Description,
+		UserID:      event.UserID.String(),
+		Notify:      event.Notify.Format(time.RFC3339),
+	}
 
 	return eventDto
 }
