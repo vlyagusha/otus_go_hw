@@ -2,19 +2,20 @@ package sqlstorage
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v4"
+	pgxv4 "github.com/jackc/pgx/v4"
 	"github.com/vlyagusha/otus_go_hw/hw12_13_14_15_calendar/internal/app"
 	"github.com/vlyagusha/otus_go_hw/hw12_13_14_15_calendar/internal/storage"
 )
 
 type Storage struct {
 	ctx  context.Context
-	conn *pgx.Conn
+	conn *pgxv4.Conn
 	dsn  string
 }
 
@@ -26,7 +27,7 @@ func New(ctx context.Context, dsn string) *Storage {
 }
 
 func (s *Storage) Connect(ctx context.Context) (app.Storage, error) {
-	conn, err := pgx.Connect(ctx, s.dsn)
+	conn, err := pgxv4.Connect(ctx, s.dsn)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to connect database: %v\n", err)
 		return nil, err
@@ -94,13 +95,41 @@ func (s *Storage) Delete(id uuid.UUID) error {
 	return err
 }
 
+func (s *Storage) Find(id uuid.UUID) (*storage.Event, error) {
+	var e storage.Event
+
+	sql := `
+select id, title, started_at, finished_at, description, user_id, notify 
+from events
+where id = $1
+`
+	err := s.conn.QueryRow(s.ctx, sql, id).Scan(
+		&e.ID,
+		&e.Title,
+		&e.StartedAt,
+		&e.FinishedAt,
+		&e.Description,
+		&e.UserID,
+		&e.Notify,
+	)
+
+	if err == nil {
+		return &e, nil
+	}
+	if errors.Is(err, pgxv4.ErrNoRows) {
+		return nil, nil
+	}
+
+	return nil, fmt.Errorf("failed to scan SQL result into struct: %w", err)
+}
+
 func (s *Storage) FindAll() ([]storage.Event, error) {
 	var events []storage.Event
 
 	sql := `
 select id, title, started_at, finished_at, description, user_id, notify 
 from events
-order by date
+order by started_at
 `
 	rows, err := s.conn.Query(s.ctx, sql)
 	if err != nil {
@@ -240,12 +269,12 @@ func (s *Storage) FindOnMonth(dayStart time.Time) ([]storage.Event, error) { //n
 	return events, nil
 }
 
-func (s *Storage) findOnDate(from, to string) (pgx.Rows, error) {
+func (s *Storage) findOnDate(from, to string) (pgxv4.Rows, error) {
 	const searchSQL = `
 select id, title, started_at, finished_at, description, user_id, notify 
 from events
 where started_at >= $1 and started_at <= $2
-order by date
+order by started_at
 `
 	return s.conn.Query(s.ctx, searchSQL, from, to)
 }

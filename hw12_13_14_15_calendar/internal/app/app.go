@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -24,6 +25,7 @@ type Storage interface {
 	Create(e storage.Event) error
 	Update(e storage.Event) error
 	Delete(id uuid.UUID) error
+	Find(id uuid.UUID) (*storage.Event, error)
 	FindAll() ([]storage.Event, error)
 	FindOnDay(day time.Time) ([]storage.Event, error)
 	FindOnWeek(dayStart time.Time) ([]storage.Event, error)
@@ -37,10 +39,112 @@ func New(logger Logger, storage Storage) *App {
 	}
 }
 
-func (a *App) CreateEvent(ctx context.Context, id, title string) error {
-	// TODO
+func (a *App) CreateEvent(ctx context.Context, event storage.Event) error {
+	var existingEvent *storage.Event
+	var err error
+
+	a.Logger.Debug("App.CreateEvent %s", event.ID)
+
+	if existingEvent, err = a.Storage.Find(event.ID); err != nil {
+		a.Logger.Error("App.CreateEvent error: find existing event error: %s", err)
+		return err
+	}
+
+	if existingEvent != nil {
+		a.Logger.Warn("App.CreateEvent error: event with ID %s already exists", event.ID)
+		return fmt.Errorf("event with ID %s already exists", event.ID)
+	}
+
+	if err = a.Storage.Create(event); err != nil {
+		a.Logger.Error("App.CreateEvent error: %s", err)
+		return err
+	}
+
 	return nil
-	// return a.storage.CreateEvent(storage.Event{ID: id, Title: title})
 }
 
-// TODO
+func (a *App) UpdateEvent(ctx context.Context, event storage.Event) error {
+	var existingEvent *storage.Event
+	var err error
+
+	a.Logger.Debug("App.UpdateEvent %s", event.ID)
+
+	if existingEvent, err = a.Storage.Find(event.ID); err != nil {
+		a.Logger.Error("App.UpdateEvent error: find existing event error: %s", err)
+		return err
+	}
+
+	if existingEvent == nil {
+		a.Logger.Warn("App.UpdateEvent error: event with ID %s not found", event.ID)
+		return fmt.Errorf("event with ID %s not found", event.ID)
+	}
+
+	if err = a.Storage.Update(event); err != nil {
+		a.Logger.Error("App.UpdateEvent error: %s", err)
+		return err
+	}
+
+	return nil
+}
+
+func (a *App) DeleteEvent(ctx context.Context, id uuid.UUID) error {
+	var existingEvent *storage.Event
+	var err error
+
+	a.Logger.Debug("App.DeleteEvent %s", id)
+
+	if existingEvent, err = a.Storage.Find(id); err != nil {
+		a.Logger.Error("App.DeleteEvent error: find existing event error: %s", err)
+		return err
+	}
+
+	if existingEvent == nil {
+		a.Logger.Warn("App.UpdateEvent error: event with ID %s not found", id)
+		return fmt.Errorf("event with ID %s not found", id)
+	}
+
+	if err = a.Storage.Delete(id); err != nil {
+		a.Logger.Error("App.DeleteEvent error: %s", err)
+		return err
+	}
+
+	return nil
+}
+
+func (a *App) GetEvents(ctx context.Context) ([]storage.Event, error) {
+	return a.Storage.FindAll()
+}
+
+func (a *App) GetEventsDay(ctx context.Context, day time.Time) ([]storage.Event, error) {
+	return a.Storage.FindOnDay(day)
+}
+
+func (a *App) GetEventsWeek(ctx context.Context, dayStart time.Time) ([]storage.Event, error) {
+	return a.Storage.FindOnWeek(dayStart)
+}
+
+func (a *App) GetEventsMonth(ctx context.Context, dayStart time.Time) ([]storage.Event, error) {
+	return a.Storage.FindOnMonth(dayStart)
+}
+
+func (a *App) GetEventsStartedIn(ctx context.Context, day time.Time, interval time.Duration) ([]storage.Event, error) {
+	a.Logger.Debug("App.GetEventsStartedIn: day: %s, interval: %s", day, interval)
+
+	var events []storage.Event
+	day = day.Truncate(time.Minute * 1440)
+
+	// todo: make special Storage function
+	items, err := a.Storage.FindAll()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, item := range items {
+		diff := item.StartedAt.Sub(day)
+		if diff >= 0 && diff <= interval {
+			events = append(events, item)
+		}
+	}
+
+	return events, nil
+}

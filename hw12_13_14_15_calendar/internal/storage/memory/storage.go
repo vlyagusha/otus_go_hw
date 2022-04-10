@@ -1,6 +1,7 @@
 package memorystorage
 
 import (
+	"sort"
 	"sync"
 	"time"
 
@@ -53,6 +54,11 @@ func (s *Storage) FindAll() ([]storage.Event, error) {
 	for _, event := range s.events {
 		events = append(events, event)
 	}
+
+	sort.Slice(events, func(i, j int) bool {
+		return events[i].StartedAt.Unix() < events[j].StartedAt.Unix()
+	})
+
 	return events, nil
 }
 
@@ -68,6 +74,10 @@ func (s *Storage) FindOnDay(day time.Time) ([]storage.Event, error) {
 			events = append(events, event)
 		}
 	}
+	sort.Slice(events, func(i, j int) bool {
+		return events[i].StartedAt.Unix() < events[j].StartedAt.Unix()
+	})
+
 	return events, nil
 }
 
@@ -83,6 +93,10 @@ func (s *Storage) FindOnWeek(dayStart time.Time) ([]storage.Event, error) {
 			events = append(events, event)
 		}
 	}
+	sort.Slice(events, func(i, j int) bool {
+		return events[i].StartedAt.Unix() < events[j].StartedAt.Unix()
+	})
+
 	return events, nil
 }
 
@@ -98,7 +112,22 @@ func (s *Storage) FindOnMonth(dayStart time.Time) ([]storage.Event, error) {
 			events = append(events, event)
 		}
 	}
+	sort.Slice(events, func(i, j int) bool {
+		return events[i].StartedAt.Unix() < events[j].StartedAt.Unix()
+	})
+
 	return events, nil
+}
+
+func (s *Storage) Find(id uuid.UUID) (*storage.Event, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	if event, ok := s.events[id]; ok {
+		return &event, nil
+	}
+
+	return nil, nil
 }
 
 func New() *Storage {
