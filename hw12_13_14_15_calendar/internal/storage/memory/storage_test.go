@@ -9,7 +9,7 @@ import (
 	memorystorage "github.com/vlyagusha/otus_go_hw/hw12_13_14_15_calendar/internal/storage"
 )
 
-func TestStorage(t *testing.T) {
+func TestStorage(t *testing.T) { //nolint:funlen,gocognit,nolintlint
 	storage := New()
 
 	t.Run("common test", func(t *testing.T) {
@@ -95,4 +95,71 @@ func TestStorage(t *testing.T) {
 		}
 		require.Len(t, saved, 0)
 	})
+
+	t.Run("test notify list", func(t *testing.T) {
+		events := []memorystorage.Event{
+			{
+				ID:        parseUUID(t, "4927aa58-a175-429a-a125-c04765597150"),
+				StartedAt: parseDate(t, "2022-04-03T11:59:59Z"),
+				Notify:    parseDate(t, "2022-04-03T11:59:59Z"),
+			},
+			{
+				ID:        parseUUID(t, "4927aa58-a175-429a-a125-c04765597151"),
+				StartedAt: parseDate(t, "2022-04-03T12:00:00Z"),
+				Notify:    parseDate(t, "2022-04-03T12:00:00Z"),
+			},
+			{
+				ID:        parseUUID(t, "4927aa58-a175-429a-a125-c04765597152"),
+				StartedAt: parseDate(t, "2022-04-04T12:00:00Z"),
+				Notify:    parseDate(t, "2022-04-03T12:00:00Z"),
+			},
+			{
+				ID:        parseUUID(t, "4927aa58-a175-429a-a125-c04765597153"),
+				StartedAt: parseDate(t, "2022-04-05T12:00:01Z"),
+				Notify:    parseDate(t, "2022-04-04T11:59:01Z"),
+			},
+		}
+
+		for _, e := range events {
+			_ = storage.Create(e)
+		}
+
+		readyEvents, err := storage.GetEventsReadyToNotify(parseDate(t, "2022-04-03T12:00:00Z"))
+		require.Nil(t, err)
+
+		ids := extractEventIDs(readyEvents)
+		idsExpected := []string{
+			"4927aa58-a175-429a-a125-c04765597150",
+			"4927aa58-a175-429a-a125-c04765597151",
+			"4927aa58-a175-429a-a125-c04765597152",
+		}
+		require.Equal(t, idsExpected, ids)
+	})
+}
+
+func parseUUID(t *testing.T, str string) uuid.UUID {
+	t.Helper()
+	id, err := uuid.Parse(str)
+	if err != nil {
+		t.Errorf("failed to parse UUID: %s", err)
+	}
+	return id
+}
+
+func parseDate(t *testing.T, str string) time.Time {
+	t.Helper()
+	dt, err := time.Parse(time.RFC3339, str)
+	if err != nil {
+		t.Errorf("failed to parse date: %s", err)
+	}
+	return dt
+}
+
+func extractEventIDs(events []memorystorage.Event) []string {
+	res := make([]string, 0, len(events))
+	for _, e := range events {
+		res = append(res, e.ID.String())
+	}
+
+	return res
 }

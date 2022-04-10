@@ -14,6 +14,12 @@ type Storage struct {
 	events map[uuid.UUID]storage.Event
 }
 
+func New() *Storage {
+	return &Storage{
+		events: make(map[uuid.UUID]storage.Event),
+	}
+}
+
 func (s *Storage) Create(e storage.Event) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -130,8 +136,34 @@ func (s *Storage) Find(id uuid.UUID) (*storage.Event, error) {
 	return nil, nil
 }
 
-func New() *Storage {
-	return &Storage{
-		events: make(map[uuid.UUID]storage.Event),
+func (s *Storage) GetEventsReadyToNotify(dt time.Time) ([]storage.Event, error) {
+	var res []storage.Event
+
+	for _, e := range s.events {
+		if e.Notify.Sub(dt) <= 0 {
+			res = append(res, e)
+		}
 	}
+
+	sort.Slice(res, func(i, j int) bool {
+		return res[i].StartedAt.Unix() < res[j].StartedAt.Unix()
+	})
+
+	return res, nil
+}
+
+func (s *Storage) GetEventsOlderThan(dt time.Time) ([]storage.Event, error) {
+	var res []storage.Event
+
+	for _, e := range s.events {
+		if dt.Sub(e.StartedAt) >= 0 {
+			res = append(res, e)
+		}
+	}
+
+	sort.Slice(res, func(i, j int) bool {
+		return res[i].StartedAt.Unix() < res[j].StartedAt.Unix()
+	})
+
+	return res, nil
 }
