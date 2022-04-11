@@ -16,12 +16,6 @@ import (
 	"github.com/vlyagusha/otus_go_hw/hw12_13_14_15_calendar/internal/storage/factory"
 )
 
-var configFile string
-
-func init() {
-	flag.StringVar(&configFile, "config", "configs/calendar_config.yaml", "Path to configuration file")
-}
-
 func main() {
 	flag.Parse()
 
@@ -30,7 +24,7 @@ func main() {
 		return
 	}
 
-	config, err := internalconfig.LoadConfig(configFile)
+	config, err := internalconfig.LoadConfig()
 	if err != nil {
 		log.Fatalf("Failed to load config: %s", err)
 	}
@@ -51,7 +45,7 @@ func main() {
 
 	calendar := app.New(logg, storage)
 
-	serverGrpc := internalgrpc.NewServer(logg, calendar, config.HTTP.Host, config.GRPC.Port)
+	serverGrpc := internalgrpc.NewServer(logg, calendar, config.GRPC.Host, config.GRPC.Port)
 
 	go func() {
 		if err := serverGrpc.Start(); err != nil {
@@ -68,7 +62,7 @@ func main() {
 
 	go func() {
 		if err := server.Start(ctx); err != nil {
-			logg.Error("failed to start grpc server: " + err.Error())
+			logg.Error("failed to start server: " + err.Error())
 			cancel()
 		}
 	}()
@@ -85,11 +79,6 @@ func main() {
 	}()
 
 	logg.Info("calendar is running...")
-
-	if err := server.Start(ctx); err != nil {
-		cancel()
-		log.Fatalf("Failed to start http server: %s", err)
-	}
 
 	<-ctx.Done()
 }
