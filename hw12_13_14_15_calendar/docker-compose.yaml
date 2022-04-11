@@ -7,6 +7,7 @@ services:
       dockerfile: ./build/calendar/Dockerfile
     depends_on:
       - postgres
+      - rabbit
     ports:
       - "8008:80"
       - "8088:8080"
@@ -27,6 +28,7 @@ services:
       dockerfile: ./build/scheduler/Dockerfile
     depends_on:
       - postgres
+      - rabbit
     environment:
       LOG_LEVEL: ${LOG_LEVEL}
       LOG_FILENAME: ${LOG_FILENAME}
@@ -44,6 +46,7 @@ services:
       dockerfile: ./build/sender/Dockerfile
     depends_on:
       - postgres
+      - rabbit
     environment:
       LOG_LEVEL: ${LOG_LEVEL}
       LOG_FILENAME: ${LOG_FILENAME}
@@ -75,7 +78,7 @@ services:
     container_name: vlyagusha-rabbit
     image: rabbitmq:3.9.14-management
     ports:
-      #      - "5672:5672"
+      - "5672:5672"
       - "15672:15672"
 
   migrations:
